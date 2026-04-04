@@ -75,12 +75,18 @@ function initializeDatabase($pdo) {
     $row = $stmt->fetch();
     if ($row['cnt'] == 0) {
         $pdo->exec("
-            INSERT INTO admin_users (username, password_hash, email, full_name)
-            VALUES (
+            INSERT INTO admin_users (username, password_hash, email, full_name) VALUES
+            (
                 'admin',
                 '\$2y\$10\$D.jjza.bRceY1yA579AOv.62kZyzi6f1lxlj8RtCyQ0sj5g6GriJq',
                 'admin@sgsurvey.com',
                 'Administrator'
+            ),
+            (
+                'subhajitghosh',
+                '\$2y\$10\$Fa0kjbML4Z4e7PARz6v3AOliQ8PjzmnPI/7Z2QKZoyx8Am.upcSmO',
+                'subhajitghosh@sgsurvey.com',
+                'Subhajit Ghosh'
             )
         ");
     }
