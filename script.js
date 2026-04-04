@@ -1,478 +1,247 @@
-// ==========================================
-// PAGE LOADER
-// ==========================================
+/* =============================================
+   SG SURVEY — Main Script
+   ============================================= */
 
+// =============================================
+// LOADER
+// =============================================
 window.addEventListener('load', () => {
-    const loader = document.getElementById('pageLoader');
-    setTimeout(() => {
-        loader.classList.add('hidden');
-    }, 1000);
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.add('hidden');
+  }, 900);
 });
 
-// ==========================================
-// NAVIGATION - STICKY & SCROLL
-// ==========================================
-
-const navbar = document.getElementById('navbar');
+// =============================================
+// NAVBAR — sticky + scroll active
+// =============================================
+const navbar  = document.getElementById('navbar');
 const navLinks = document.querySelectorAll('.nav-link');
-const mobileToggle = document.getElementById('mobileToggle');
-const navMenu = document.getElementById('navMenu');
 
-// Sticky navbar on scroll
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+  updateActiveLink();
+});
+
+function updateActiveLink() {
+  const scrollY = window.pageYOffset + 120;
+  document.querySelectorAll('section[id], div.stats-strip').forEach(section => {
+    const top    = section.offsetTop;
+    const height = section.offsetHeight;
+    const id     = section.id || '';
+    if (scrollY >= top && scrollY < top + height) {
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + id || (id === 'home' && a.getAttribute('href') === '#'));
+      });
     }
-    
-    // Update active nav link based on scroll position
-    updateActiveNavLink();
-});
-
-// Smooth scroll and active link
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        // Only prevent default for hash links
-        if (link.getAttribute('href').startsWith('#')) {
-            e.preventDefault();
-            
-            const targetId = link.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                const offsetTop = targetSection.offsetTop - navbar.offsetHeight;
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-            
-            // Close mobile menu after click
-            navMenu.classList.remove('active');
-            mobileToggle.classList.remove('active');
-            
-            // Update active state
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-        }
-    });
-});
-
-// Update active nav link based on scroll position
-function updateActiveNavLink() {
-    const sections = document.querySelectorAll('section[id]');
-    const scrollY = window.pageYOffset;
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop - navbar.offsetHeight - 100;
-        const sectionHeight = section.offsetHeight;
-        const sectionId = section.getAttribute('id');
-        
-        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${sectionId}`) {
-                    link.classList.add('active');
-                }
-            });
-        }
-    });
+  });
 }
 
-// Mobile menu toggle
-mobileToggle.addEventListener('click', () => {
-    mobileToggle.classList.toggle('active');
-    navMenu.classList.toggle('active');
-});
+// Mobile menu
+const mobileToggle = document.getElementById('mobileToggle');
+const navMenu      = document.getElementById('navMenu');
 
-// Close mobile menu when clicking outside
-document.addEventListener('click', (e) => {
+if (mobileToggle && navMenu) {
+  mobileToggle.addEventListener('click', () => {
+    navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
+    navMenu.style.flexDirection = 'column';
+    navMenu.style.position = 'absolute';
+    navMenu.style.top = '70px';
+    navMenu.style.left = '0';
+    navMenu.style.right = '0';
+    navMenu.style.background = 'rgba(8,13,26,0.97)';
+    navMenu.style.backdropFilter = 'blur(20px)';
+    navMenu.style.padding = '20px 24px';
+    navMenu.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+    navMenu.style.gap = '18px';
+  });
+
+  document.addEventListener('click', e => {
     if (!navMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
-        navMenu.classList.remove('active');
-        mobileToggle.classList.remove('active');
+      navMenu.style.display = 'none';
     }
-});
+  });
+}
 
-// ==========================================
+// =============================================
 // THEME TOGGLE
-// ==========================================
-
+// =============================================
 const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
 
-// Check for saved theme preference or default to 'light'
-const currentTheme = localStorage.getItem('theme') || 'light';
-body.setAttribute('data-theme', currentTheme);
-updateThemeIcon(currentTheme);
-
-themeToggle.addEventListener('click', () => {
-    const theme = body.getAttribute('data-theme');
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    
-    body.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
-});
-
-function updateThemeIcon(theme) {
-    const icon = themeToggle.querySelector('i');
-    if (theme === 'dark') {
-        icon.classList.remove('fa-moon');
-        icon.classList.add('fa-sun');
-    } else {
-        icon.classList.remove('fa-sun');
-        icon.classList.add('fa-moon');
-    }
+function applyTheme(theme) {
+  document.body.classList.toggle('light', theme === 'light');
+  const icon = themeToggle ? themeToggle.querySelector('i') : null;
+  if (icon) {
+    icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+  }
 }
 
-// ==========================================
+const savedTheme = localStorage.getItem('sg-theme') || 'dark';
+applyTheme(savedTheme);
+
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const current = document.body.classList.contains('light') ? 'light' : 'dark';
+    const next    = current === 'light' ? 'dark' : 'light';
+    localStorage.setItem('sg-theme', next);
+    applyTheme(next);
+  });
+}
+
+// =============================================
 // IMAGE SLIDER
-// ==========================================
+// =============================================
+const sliderTrack = document.getElementById('sliderTrack');
+const dotsEl      = document.querySelectorAll('#sliderDots .dot');
+const prevBtn     = document.getElementById('prevBtn');
+const nextBtn     = document.getElementById('nextBtn');
 
-const slider = document.getElementById('imageSlider');
-const slides = slider.querySelectorAll('.slide');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const dotsContainer = document.getElementById('sliderDots');
-
-let currentSlide = 0;
-let slideInterval;
-
-// Create dots
-slides.forEach((_, index) => {
-    const dot = document.createElement('div');
-    dot.classList.add('slider-dot');
-    if (index === 0) dot.classList.add('active');
-    dot.addEventListener('click', () => goToSlide(index));
-    dotsContainer.appendChild(dot);
-});
-
-const dots = dotsContainer.querySelectorAll('.slider-dot');
-
-function showSlide(index) {
-    slides.forEach(slide => slide.classList.remove('active'));
-    dots.forEach(dot => dot.classList.remove('active'));
-    
-    slides[index].classList.add('active');
-    dots[index].classList.add('active');
-    
-    currentSlide = index;
-}
-
-function nextSlide() {
-    currentSlide = (currentSlide + 1) % slides.length;
-    showSlide(currentSlide);
-}
-
-function prevSlide() {
-    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-    showSlide(currentSlide);
-}
+let currentSlide  = 0;
+const totalSlides = dotsEl.length;
+let sliderTimer;
 
 function goToSlide(index) {
-    showSlide(index);
-    resetSlideInterval();
+  currentSlide = (index + totalSlides) % totalSlides;
+  if (sliderTrack) sliderTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
+  dotsEl.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
 }
 
-function resetSlideInterval() {
-    clearInterval(slideInterval);
-    slideInterval = setInterval(nextSlide, 5000);
+function startTimer() {
+  clearInterval(sliderTimer);
+  sliderTimer = setInterval(() => goToSlide(currentSlide + 1), 5000);
 }
 
-// Event listeners
-nextBtn.addEventListener('click', () => {
-    nextSlide();
-    resetSlideInterval();
-});
+if (prevBtn) prevBtn.addEventListener('click', () => { goToSlide(currentSlide - 1); startTimer(); });
+if (nextBtn) nextBtn.addEventListener('click', () => { goToSlide(currentSlide + 1); startTimer(); });
+dotsEl.forEach((d, i) => d.addEventListener('click', () => { goToSlide(i); startTimer(); }));
+startTimer();
 
-prevBtn.addEventListener('click', () => {
-    prevSlide();
-    resetSlideInterval();
-});
+// =============================================
+// STATS COUNTER
+// =============================================
+function animateCounter(el) {
+  const target = parseInt(el.getAttribute('data-target'), 10);
+  const duration = 1800;
+  const step = target / (duration / 16);
+  let current = 0;
 
-// Auto-play slider
-slideInterval = setInterval(nextSlide, 5000);
-
-// ==========================================
-// STATISTICS COUNTER ANIMATION
-// ==========================================
-
-const stats = document.querySelectorAll('.stat-number');
-let statsAnimated = false;
-
-function animateStats() {
-    if (statsAnimated) return;
-    
-    stats.forEach(stat => {
-        const target = parseInt(stat.getAttribute('data-target'));
-        const increment = target / 100;
-        let current = 0;
-        
-        const updateCounter = () => {
-            current += increment;
-            if (current < target) {
-                stat.textContent = Math.ceil(current);
-                requestAnimationFrame(updateCounter);
-            } else {
-                stat.textContent = target + '+';
-            }
-        };
-        
-        updateCounter();
-    });
-    
-    statsAnimated = true;
+  const tick = () => {
+    current += step;
+    if (current < target) {
+      el.textContent = Math.floor(current) + '+';
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = target + '+';
+    }
+  };
+  tick();
 }
 
-// Trigger stats animation when section is in view
-const statsSection = document.querySelector('.stats');
-const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            animateStats();
-        }
-    });
+const statNumbers = document.querySelectorAll('.stat-number');
+const statsObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCounter(entry.target);
+      statsObserver.unobserve(entry.target);
+    }
+  });
 }, { threshold: 0.5 });
 
-if (statsSection) {
-    statsObserver.observe(statsSection);
-}
+statNumbers.forEach(el => statsObserver.observe(el));
 
-// ==========================================
-// TESTIMONIAL SLIDER
-// ==========================================
-
-const testimonialSlider = document.getElementById('testimonialSlider');
-const testimonialTrack = testimonialSlider.querySelector('.testimonial-track');
-const testimonialCards = testimonialTrack.querySelectorAll('.testimonial-card');
-const testimonialPrev = document.getElementById('testimonialPrev');
-const testimonialNext = document.getElementById('testimonialNext');
-
-let currentTestimonial = 0;
-
-function showTestimonial(index) {
-    const offset = -index * 100;
-    testimonialTrack.style.transform = `translateX(${offset}%)`;
-    currentTestimonial = index;
-}
-
-function nextTestimonial() {
-    currentTestimonial = (currentTestimonial + 1) % testimonialCards.length;
-    showTestimonial(currentTestimonial);
-}
-
-function prevTestimonial() {
-    currentTestimonial = (currentTestimonial - 1 + testimonialCards.length) % testimonialCards.length;
-    showTestimonial(currentTestimonial);
-}
-
-testimonialNext.addEventListener('click', nextTestimonial);
-testimonialPrev.addEventListener('click', prevTestimonial);
-
-// Auto-rotate testimonials
-setInterval(nextTestimonial, 7000);
-
-// ==========================================
-// BOOKING FORM SUBMISSION
-// ==========================================
-
-const bookingForm = document.getElementById('bookingForm');
-const formMessage = document.getElementById('formMessage');
-
-bookingForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // Get form data
-    const formData = new FormData(bookingForm);
-    
-    // Disable submit button
-    const submitBtn = bookingForm.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-    
-    try {
-        // Send data to backend
-        const response = await fetch('book.php', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Show success message
-            formMessage.className = 'form-message success';
-            formMessage.textContent = result.message || 'Booking submitted successfully! We will contact you soon.';
-            
-            // Reset form
-            bookingForm.reset();
-            
-            // Hide message after 5 seconds
-            setTimeout(() => {
-                formMessage.style.display = 'none';
-            }, 5000);
-        } else {
-            // Show error message
-            formMessage.className = 'form-message error';
-            formMessage.textContent = result.message || 'Failed to submit booking. Please try again.';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        formMessage.className = 'form-message error';
-        formMessage.textContent = 'An error occurred. Please try again later.';
-    } finally {
-        // Re-enable submit button
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+// =============================================
+// FADE-UP ON SCROLL
+// =============================================
+const fadeObserver = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      fadeObserver.unobserve(entry.target);
     }
-});
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
 
-// ==========================================
-// FORM VALIDATION
-// ==========================================
+document.querySelectorAll('.fade-up').forEach(el => fadeObserver.observe(el));
 
-// Set minimum date for booking (today)
-const dateInput = document.getElementById('date');
-if (dateInput) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.setAttribute('min', today);
-}
-
-// Phone number validation
-const phoneInput = document.getElementById('phone');
-if (phoneInput) {
-    phoneInput.addEventListener('input', (e) => {
-        // Remove non-numeric characters
-        e.target.value = e.target.value.replace(/[^0-9]/g, '');
-        
-        // Limit to 10 digits
-        if (e.target.value.length > 10) {
-            e.target.value = e.target.value.slice(0, 10);
-        }
-    });
-}
-
-// ==========================================
-// SCROLL ANIMATIONS
-// ==========================================
-
-// Fade in elements on scroll
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
-    });
-}, observerOptions);
-
-// Observe elements
-const animateElements = document.querySelectorAll('.service-card, .survey-point, .testimonial-card, .info-item');
-animateElements.forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(el);
-});
-
-// ==========================================
-// SMOOTH SCROLL FOR ALL HASH LINKS
-// ==========================================
-
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const href = this.getAttribute('href');
-        
-        // Skip if it's just '#' or admin link
-        if (href === '#' || this.classList.contains('admin-link')) return;
-        
-        e.preventDefault();
-        
-        const targetElement = document.querySelector(href);
-        if (targetElement) {
-            const offsetTop = targetElement.offsetTop - navbar.offsetHeight;
-            window.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-            });
-        }
-    });
-});
-
-// ==========================================
-// UTILITY FUNCTIONS
-// ==========================================
-
-// Debounce function for performance
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Apply debounce to scroll events if needed
-window.addEventListener('scroll', debounce(() => {
-    // Additional scroll-based animations can be added here
-}, 100));
-
-// ==========================================
-// CONSOLE MESSAGE
-// ==========================================
-
-console.log('%c🗺️ SG Survey - Professional Land Surveying Services', 'color: #0a4d68; font-size: 16px; font-weight: bold;');
-console.log('%cWebsite developed with precision and care', 'color: #05c3de; font-size: 12px;');
-window.addEventListener("scroll", () => {
-  document.querySelectorAll(".card").forEach(card => {
-    const top = card.getBoundingClientRect().top;
-    if(top < window.innerHeight){
-      card.style.opacity = 1;
-      card.style.transform = "translateY(0)";
+// =============================================
+// SMOOTH SCROLL
+// =============================================
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (href === '#') return;
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      const offset = target.offsetTop - (navbar ? navbar.offsetHeight : 0) - 10;
+      window.scrollTo({ top: offset, behavior: 'smooth' });
+      if (navMenu) navMenu.style.display = 'none';
     }
   });
 });
-const toggle = document.getElementById("themeToggle");
 
-toggle.onclick = () => {
-  document.body.classList.toggle("light");
+// =============================================
+// BOOKING FORM — set min date
+// =============================================
+const dateInput = document.getElementById('date');
+if (dateInput) {
+  dateInput.min = new Date().toISOString().split('T')[0];
+}
 
-  if(document.body.classList.contains("light")){
-    localStorage.setItem("theme","light");
-  } else {
-    localStorage.setItem("theme","dark");
-  }
-};
+const phoneInput = document.getElementById('phone');
+if (phoneInput) {
+  phoneInput.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+  });
+}
 
-window.onload = () => {
-  if(localStorage.getItem("theme") === "light"){
-    document.body.classList.add("light");
-  }
-};
-window.addEventListener("load", () => {
-  document.getElementById("loader").style.display = "none";
-});
+// AJAX form submit
+const bookingForm  = document.getElementById('bookingForm');
+const formMessage  = document.getElementById('formMessage');
+
+if (bookingForm) {
+  bookingForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = bookingForm.querySelector('button[type="submit"]');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+    try {
+      const resp = await fetch('book.php', { method: 'POST', body: new FormData(bookingForm) });
+      const text = await resp.text();
+
+      if (text.includes('Booking Successful')) {
+        formMessage.className = 'form-message success';
+        formMessage.textContent = 'Booking submitted successfully! We will contact you soon.';
+        bookingForm.reset();
+      } else if (text.includes('alert(')) {
+        const match = text.match(/alert\('([^']+)'\)/);
+        formMessage.className = 'form-message error';
+        formMessage.textContent = match ? match[1] : 'Validation error. Please check your input.';
+      } else {
+        formMessage.className = 'form-message success';
+        formMessage.textContent = 'Booking submitted! We will contact you soon.';
+        bookingForm.reset();
+      }
+    } catch (err) {
+      formMessage.className = 'form-message error';
+      formMessage.textContent = 'Network error. Please try again.';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+      setTimeout(() => { if (formMessage) formMessage.style.display = 'none'; }, 6000);
+    }
+  });
+}
+
+// =============================================
+// PAY NOW (UPI)
+// =============================================
 function payNow() {
-
-  let amount = prompt("Enter amount to pay (₹):");
-
-  if(!amount) return;
-
-  let upiID = "yourupi@upi"; // 🔴 change this
-  let name = "Swarupananda Ghosh";
-
-  let url = `upi://pay?pa=${upiID}&pn=${name}&am=${amount}&cu=INR&tn=Survey Payment`;
-
+  const amount = prompt('Enter advance amount to pay (₹):');
+  if (!amount || isNaN(amount)) return;
+  const upiID = 'swarupanandaghosh@upi';
+  const url = `upi://pay?pa=${upiID}&pn=Swarupananda+Ghosh&am=${amount}&cu=INR&tn=Survey+Advance+Payment`;
   window.location.href = url;
 }
