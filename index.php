@@ -1,10 +1,15 @@
 <?php
 require_once 'db.php';
 $pdo = getDBConnection();
-$data = $pdo->query("SELECT * FROM site_data WHERE id=1")->fetch();
 
-$phone = $data['phone'] ?? '9475465392';
-$email = $data['email'] ?? 'swarupanandaghosh2@gmail.com';
+$siteDataRows = $pdo->query("SELECT data_key, data_value FROM site_data")->fetchAll();
+$siteData = [];
+foreach ($siteDataRows as $row) {
+    $siteData[$row['data_key']] = $row['data_value'];
+}
+
+$phone = $siteData['phone_primary'] ?? '9475465392';
+$email = $siteData['email'] ?? 'swarupanandaghosh2@gmail.com';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,7 +54,7 @@ $email = $data['email'] ?? 'swarupanandaghosh2@gmail.com';
     </div>
 
     <div class="hero-right">
-      <img src="visiting-card.jpg" alt="Visiting Card" class="floating-card">
+      <img src="visiting-card.jpg.jpeg" alt="Visiting Card" class="floating-card">
     </div>
 
   </div>

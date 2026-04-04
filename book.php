@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $name = sanitizeInput($_POST['name'] ?? '');
 $phone = sanitizeInput($_POST['phone'] ?? '');
 $location = sanitizeInput($_POST['location'] ?? '');
-$surveyType = sanitizeInput($_POST['surveyType'] ?? '');
+$surveyType = sanitizeInput($_POST['surveyType'] ?? $_POST['type'] ?? '');
 $date = sanitizeInput($_POST['date'] ?? '');
 $message = sanitizeInput($_POST['message'] ?? '');
 

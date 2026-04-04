@@ -93,9 +93,9 @@ try {
             $pdo->beginTransaction();
             
             try {
-                $stmt = $pdo->prepare("INSERT INTO site_data (data_key, data_value) 
-                                      VALUES (:key, :value) 
-                                      ON DUPLICATE KEY UPDATE data_value = :value");
+                $stmt = $pdo->prepare("INSERT INTO site_data (data_key, data_value)
+                                      VALUES (:key, :value)
+                                      ON CONFLICT(data_key) DO UPDATE SET data_value = excluded.data_value, updated_at = CURRENT_TIMESTAMP");
                 
                 foreach ($fieldsToUpdate as $field) {
                     if (isset($data[$field])) {
