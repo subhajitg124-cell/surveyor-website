@@ -3,14 +3,16 @@
    ============================================= */
 
 // =============================================
-// LOADER
+// LOADER — hide as fast as possible
 // =============================================
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.add('hidden');
-  }, 900);
-});
+function hideLoader() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.classList.add('hidden');
+}
+// Hide immediately when DOM is ready
+document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 300));
+// Absolute failsafe — force-hide after 2 seconds no matter what
+setTimeout(hideLoader, 2000);
 
 // =============================================
 // NAVBAR — sticky + scroll active

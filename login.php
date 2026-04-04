@@ -99,7 +99,7 @@ try {
     $_SESSION['login_time'] = time();
     
     // Update last login time
-    $updateSql = "UPDATE admin_users SET last_login = NOW() WHERE id = :id";
+    $updateSql = "UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = :id";
     $updateStmt = $pdo->prepare($updateSql);
     $updateStmt->execute([':id' => $user['id']]);
     

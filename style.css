@@ -861,32 +861,115 @@ body.light .orb { opacity: 0.08; }
 .fade-up.visible { opacity: 1; transform: translateY(0); }
 
 /* =============================================
-   RESPONSIVE
+   RESPONSIVE — Tablet (≤ 1024px)
+   ============================================= */
+@media (max-width: 1024px) {
+  .hero { padding: 110px 36px 70px; }
+  .hero-container { gap: 40px; }
+  .hero-left h1 { font-size: 3rem; }
+  .stats-inner { grid-template-columns: repeat(4, 1fr); }
+  .services { padding: 80px 36px; }
+  .about-section { padding: 80px 36px; }
+  .testimonials { padding: 80px 36px; }
+  #contact { padding: 80px 36px; }
+}
+
+/* =============================================
+   RESPONSIVE — Small Tablet / Large Phone (≤ 900px)
    ============================================= */
 @media (max-width: 900px) {
-  .navbar { padding: 16px 24px; }
-  .navbar.scrolled { padding: 12px 24px; }
+  .navbar { padding: 16px 20px; }
+  .navbar.scrolled { padding: 12px 20px; }
   .nav-links { display: none; }
   .mobile-menu-btn { display: block; }
 
-  .hero { padding: 100px 24px 60px; }
-  .hero-container { grid-template-columns: 1fr; gap: 40px; }
-  .hero-right { order: -1; }
-  .card-flip-wrapper { width: 100%; max-width: 340px; height: 210px; }
+  .hero { padding: 90px 20px 60px; }
+  .hero-container { grid-template-columns: 1fr; gap: 36px; text-align: center; }
+  .hero-right { order: -1; display: flex; justify-content: center; }
+  .card-flip-wrapper { width: 100%; max-width: 360px; height: 220px; }
+  .hero-badge { right: 0; bottom: -14px; }
+  .hero-eyebrow { justify-content: center; }
+  .hero-contact-pills { justify-content: center; }
+  .btn-group { justify-content: center; }
+  .hero-subtitle { margin-left: auto; margin-right: auto; }
+  .scroll-indicator { display: none; }
 
+  .stats-strip { padding: 36px 20px; }
   .stats-inner { grid-template-columns: repeat(2, 1fr); }
 
-  .services { padding: 70px 24px; }
-  .about-section { padding: 70px 24px; }
-  .about-inner { grid-template-columns: 1fr; gap: 40px; }
+  .services { padding: 70px 20px; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .service-card { height: 280px; }
 
-  .testimonials { padding: 70px 24px; }
-  #contact { padding: 70px 24px; }
-  .contact-inner { grid-template-columns: 1fr; gap: 30px; }
+  .about-section { padding: 70px 20px; }
+  .about-inner { grid-template-columns: 1fr; gap: 36px; }
+  .slide { height: 320px; }
 
-  .form-row { grid-template-columns: 1fr; }
-  footer { padding: 30px 24px; }
-  .footer-inner { flex-direction: column; text-align: center; }
+  .testimonials { padding: 70px 20px; }
+  .testimonials-grid { grid-template-columns: 1fr; max-width: 500px; }
 
-  .stats-strip { padding: 40px 24px; }
+  #contact { padding: 70px 20px; }
+  .contact-inner { grid-template-columns: 1fr; gap: 24px; }
+  .contact-info-card { padding: 30px 24px; }
+  .form-card { padding: 30px 24px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+
+  footer { padding: 28px 20px; }
+  .footer-inner { flex-direction: column; text-align: center; gap: 14px; }
+  .footer-links { justify-content: center; }
+}
+
+/* =============================================
+   RESPONSIVE — Phone (≤ 600px)
+   ============================================= */
+@media (max-width: 600px) {
+  .section-title { font-size: 1.8rem; }
+  .hero-left h1 { font-size: 2.2rem; }
+
+  .hero { padding: 85px 16px 50px; }
+  .card-flip-wrapper { height: 200px; }
+  .hero-badge { width: 76px; height: 76px; font-size: 0.65rem; }
+  .hero-badge span { font-size: 1.1rem; }
+
+  .pill { font-size: 0.78rem; padding: 6px 12px; }
+
+  .stats-inner { grid-template-columns: repeat(2, 1fr); }
+  .stat-number { font-size: 2.2rem; }
+
+  .services { padding: 60px 16px; }
+  .services-grid { grid-template-columns: 1fr; }
+  .service-card { height: 260px; }
+
+  .about-section { padding: 60px 16px; }
+  .slide { height: 260px; }
+  .about-right p { font-size: 0.9rem; }
+
+  .testimonials { padding: 60px 16px; }
+  .testimonial-card { padding: 26px 20px; }
+
+  #contact { padding: 60px 16px; }
+  .contact-info-card { padding: 26px 20px; }
+  .form-card { padding: 26px 20px; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { width: 100%; }
+
+  .stats-strip { padding: 28px 16px; }
+
+  .whatsapp-float { width: 50px; height: 50px; font-size: 1.3rem; bottom: 20px; right: 16px; }
+
+  footer { padding: 24px 16px; }
+}
+
+/* =============================================
+   RESPONSIVE — Small Phone (≤ 380px)
+   ============================================= */
+@media (max-width: 380px) {
+  .hero-left h1 { font-size: 1.9rem; }
+  .btn { padding: 12px 20px; font-size: 0.85rem; }
+  .card-flip-wrapper { height: 180px; }
+  .stats-inner { grid-template-columns: 1fr 1fr; }
+  .stat-number { font-size: 1.9rem; }
+  .stat-item { padding: 24px 16px; }
+  .service-card { height: 240px; }
+  .slide { height: 220px; }
 }
