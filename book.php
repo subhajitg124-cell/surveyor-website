@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'db.php';
 
 function sanitizeInput($data) {
@@ -6,52 +7,53 @@ function sanitizeInput($data) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die("Invalid request");
-}
-
-// GET DATA
-$name = sanitizeInput($_POST['name'] ?? '');
-$phone = sanitizeInput($_POST['phone'] ?? '');
-$location = sanitizeInput($_POST['location'] ?? '');
-$surveyType = sanitizeInput($_POST['surveyType'] ?? $_POST['type'] ?? '');
-$date = sanitizeInput($_POST['date'] ?? '');
-$message = sanitizeInput($_POST['message'] ?? '');
-
-// VALIDATION
-$errors = [];
-
-if (!$name) $errors[] = "Name required";
-if (!preg_match('/^[0-9]{10}$/', $phone)) $errors[] = "Invalid phone";
-if (!$location) $errors[] = "Location required";
-if (!$surveyType) $errors[] = "Survey type required";
-if (!$date) $errors[] = "Date required";
-
-// ERROR RESPONSE
-if (!empty($errors)) {
-    echo "<script>alert('".implode("\\n",$errors)."');history.back();</script>";
+    header('Location: index.php');
     exit;
 }
 
-// DATABASE
+$name       = sanitizeInput($_POST['name'] ?? '');
+$phone      = sanitizeInput($_POST['phone'] ?? '');
+$location   = sanitizeInput($_POST['location'] ?? '');
+$surveyType = sanitizeInput($_POST['surveyType'] ?? $_POST['type'] ?? '');
+$date       = sanitizeInput($_POST['date'] ?? '');
+$message    = sanitizeInput($_POST['message'] ?? '');
+
+$errors = [];
+if (!$name)                                   $errors[] = "Name is required.";
+if (!preg_match('/^[0-9]{10}$/', $phone))     $errors[] = "A valid 10-digit phone number is required.";
+if (!$location)                               $errors[] = "Location is required.";
+if (!$surveyType)                             $errors[] = "Survey type is required.";
+if (!$date)                                   $errors[] = "Preferred date is required.";
+
+if (!empty($errors)) {
+    echo "<script>alert('" . implode("\\n", $errors) . "');history.back();</script>";
+    exit;
+}
+
 try {
     $pdo = getDBConnection();
 
     $stmt = $pdo->prepare("
-        INSERT INTO bookings 
-        (name, phone, location, survey_type, preferred_date, message)
+        INSERT INTO bookings (name, phone, location, survey_type, preferred_date, message)
         VALUES (?, ?, ?, ?, ?, ?)
     ");
+    $stmt->execute([$name, $phone, $location, $surveyType, $date, $message]);
+    $bookingId = $pdo->lastInsertId();
 
-    $stmt->execute([$name,$phone,$location,$surveyType,$date,$message]);
+    $_SESSION['booking_data'] = [
+        'id'          => $bookingId,
+        'name'        => $name,
+        'phone'       => $phone,
+        'location'    => $location,
+        'survey_type' => $surveyType,
+        'preferred_date' => $date,
+        'message'     => $message,
+    ];
 
-    // SUCCESS
-   echo "<script>
-alert('Booking Successful!');
-window.open('https://wa.me/91$phone?text=New Booking: $name, $location, $surveyType', '_blank');
-window.location.href='index.php';
-</script>";
+    header('Location: booking-confirmation.php');
+    exit;
 
 } catch (Exception $e) {
-    echo "<script>alert('Error: Try again later');history.back();</script>";
+    echo "<script>alert('Sorry, something went wrong. Please try again.');history.back();</script>";
 }
 ?>
