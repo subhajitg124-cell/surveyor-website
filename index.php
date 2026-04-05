@@ -114,11 +114,11 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 <div class="stats-strip">
   <div class="stats-inner">
     <div class="stat-item fade-up">
-      <div class="stat-number" data-target="500">0</div>
+      <div class="stat-number" data-target="3000">0</div>
       <div class="stat-label">Surveys Completed</div>
     </div>
     <div class="stat-item fade-up">
-      <div class="stat-number" data-target="12">0</div>
+      <div class="stat-number" data-target="30">0</div>
       <div class="stat-label">Years Experience</div>
     </div>
     <div class="stat-item fade-up">
