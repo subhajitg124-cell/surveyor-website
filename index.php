@@ -100,7 +100,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
           </div>
         </div>
       </div>
-      <div class="hero-badge"><span>12+</span>Years<br>Expert</div>
+      <div class="hero-badge"><span>30+</span>Years<br>Expert</div>
     </div>
   </div>
 
