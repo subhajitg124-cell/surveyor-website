@@ -25,11 +25,13 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SG Survey — Professional precision land surveying services in Bankura by Swarupananda Ghosh. GPS surveys, AutoCAD sketches, laser range surveys with 30+ years of expertise.">
+<meta name="theme-color" content="#06090f">
 <title>SG Survey — Professional Land Surveying Services</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -41,6 +43,8 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 </div>
+
+<!-- PARTICLES (generated via JS, container for structure) -->
 
 <!-- LOADER -->
 <div id="loader">
