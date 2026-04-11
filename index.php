@@ -37,6 +37,9 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 </head>
 <body>
 
+<!-- WATER RIPPLE CANVAS (interactive water surface) -->
+<canvas id="waterCanvas"></canvas>
+
 <!-- BACKGROUND ORBS -->
 <div class="bg-orbs">
   <div class="orb orb-1"></div>
@@ -44,12 +47,28 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   <div class="orb orb-3"></div>
 </div>
 
-<!-- PARTICLES (generated via JS, container for structure) -->
+<!-- ANIMATED WATER WAVES BACKGROUND -->
+<div class="water-waves-bg">
+  <svg class="water-wave water-wave-1" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path d="M0,160 C320,280 640,40 960,160 C1280,280 1440,100 1440,160 L1440,320 L0,320 Z"></path>
+  </svg>
+  <svg class="water-wave water-wave-2" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path d="M0,192 C360,100 720,280 1080,192 C1260,140 1440,220 1440,192 L1440,320 L0,320 Z"></path>
+  </svg>
+  <svg class="water-wave water-wave-3" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path d="M0,224 C240,320 480,128 720,224 C960,320 1200,128 1440,224 L1440,320 L0,320 Z"></path>
+  </svg>
+</div>
 
 <!-- LOADER -->
 <div id="loader">
   <div class="loader-logo">SG SURVEY</div>
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  <div class="loader-drops">
+    <span class="loader-drop"></span>
+    <span class="loader-drop"></span>
+    <span class="loader-drop"></span>
+  </div>
 </div>
 
 <!-- NAVBAR -->
@@ -76,19 +95,19 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       <p class="hero-subtitle">Precision land surveying services in Bankura — delivering accurate measurements, legal documentation, and modern digital survey solutions.</p>
 
       <div class="hero-contact-pills">
-        <div class="pill"><i class="fas fa-phone"></i><?= htmlspecialchars($phone) ?></div>
-        <div class="pill"><i class="fas fa-envelope"></i><?= htmlspecialchars($email) ?></div>
-        <div class="pill"><i class="fas fa-map-marker-alt"></i><?= htmlspecialchars($location) ?></div>
+        <div class="pill water-hover"><?= '<i class="fas fa-phone"></i>' . htmlspecialchars($phone) ?></div>
+        <div class="pill water-hover"><?= '<i class="fas fa-envelope"></i>' . htmlspecialchars($email) ?></div>
+        <div class="pill water-hover"><?= '<i class="fas fa-map-marker-alt"></i>' . htmlspecialchars($location) ?></div>
       </div>
 
       <div class="btn-group">
-        <a href="#contact" class="btn btn-primary"><i class="fas fa-calendar-check"></i> Book a Survey</a>
-        <a href="tel:<?= htmlspecialchars($phone) ?>" class="btn btn-outline"><i class="fas fa-phone"></i> Call Now</a>
+        <a href="#contact" class="btn btn-primary water-hover"><i class="fas fa-calendar-check"></i> Book a Survey</a>
+        <a href="tel:<?= htmlspecialchars($phone) ?>" class="btn btn-outline water-hover"><i class="fas fa-phone"></i> Call Now</a>
       </div>
     </div>
 
     <div class="hero-right fade-up">
-      <div class="card-flip-wrapper" title="Hover to flip">
+      <div class="card-flip-wrapper water-hover" title="Hover to flip">
         <div class="card-flip-inner">
           <div class="card-face card-front">
             <img src="visiting-card.jpg.jpeg" alt="Swarupananda Ghosh - Land Surveyor Visiting Card">
@@ -114,26 +133,41 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   </div>
 </section>
 
+<!-- WAVE DIVIDER -->
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+    <path d="M0,40 C240,120 480,0 720,60 C960,120 1200,20 1440,80 L1440,120 L0,120 Z" class="wave-fill"></path>
+    <path d="M0,60 C360,0 720,120 1080,40 C1260,0 1440,60 1440,40 L1440,120 L0,120 Z" class="wave-fill wave-fill-2"></path>
+  </svg>
+</div>
+
 <!-- STATS STRIP -->
 <div class="stats-strip">
   <div class="stats-inner">
-    <div class="stat-item fade-up">
+    <div class="stat-item water-hover fade-up">
       <div class="stat-number" data-target="3000">0</div>
       <div class="stat-label">Surveys Completed</div>
     </div>
-    <div class="stat-item fade-up">
+    <div class="stat-item water-hover fade-up">
       <div class="stat-number" data-target="30">0</div>
       <div class="stat-label">Years Experience</div>
     </div>
-    <div class="stat-item fade-up">
+    <div class="stat-item water-hover fade-up">
       <div class="stat-number" data-target="4">0</div>
       <div class="stat-label">Service Types</div>
     </div>
-    <div class="stat-item fade-up">
+    <div class="stat-item water-hover fade-up">
       <div class="stat-number" data-target="100">0</div>
       <div class="stat-label">Client Satisfaction %</div>
     </div>
   </div>
+</div>
+
+<!-- WAVE DIVIDER -->
+<div class="wave-divider wave-divider-flip">
+  <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+    <path d="M0,40 C240,120 480,0 720,60 C960,120 1200,20 1440,80 L1440,120 L0,120 Z" class="wave-fill"></path>
+  </svg>
 </div>
 
 <!-- SERVICES -->
@@ -144,7 +178,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 
   <div class="services-grid">
 
-    <div class="service-card fade-up">
+    <div class="service-card water-hover fade-up">
       <div class="service-card-inner">
         <div class="service-front">
           <div class="service-icon"><i class="fas fa-map"></i></div>
@@ -164,7 +198,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       </div>
     </div>
 
-    <div class="service-card fade-up">
+    <div class="service-card water-hover fade-up">
       <div class="service-card-inner">
         <div class="service-front">
           <div class="service-icon"><i class="fas fa-satellite"></i></div>
@@ -184,7 +218,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       </div>
     </div>
 
-    <div class="service-card fade-up">
+    <div class="service-card water-hover fade-up">
       <div class="service-card-inner">
         <div class="service-front">
           <div class="service-icon"><i class="fas fa-drafting-compass"></i></div>
@@ -204,7 +238,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       </div>
     </div>
 
-    <div class="service-card fade-up">
+    <div class="service-card water-hover fade-up">
       <div class="service-card-inner">
         <div class="service-front">
           <div class="service-icon"><i class="fas fa-crosshairs"></i></div>
@@ -227,10 +261,18 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   </div>
 </section>
 
+<!-- WAVE DIVIDER -->
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+    <path d="M0,80 C360,20 720,100 1080,40 C1260,10 1440,60 1440,40 L1440,120 L0,120 Z" class="wave-fill"></path>
+    <path d="M0,60 C200,100 500,20 800,70 C1100,120 1300,30 1440,60 L1440,120 L0,120 Z" class="wave-fill wave-fill-2"></path>
+  </svg>
+</div>
+
 <!-- ABOUT + SLIDER -->
 <section class="about-section" id="about">
   <div class="about-inner">
-    <div class="slider-wrapper fade-up">
+    <div class="slider-wrapper water-hover fade-up">
       <div class="slider-track" id="sliderTrack">
         <div class="slide"><img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=700&q=80" alt="Land surveying field work"></div>
         <div class="slide"><img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=700&q=80" alt="Construction surveying"></div>
@@ -254,21 +296,21 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       <p>Land surveying is the science of measuring and mapping boundaries, elevations, and spatial relationships of land. It creates the legal foundation for property ownership, construction, and infrastructure development.</p>
 
       <div class="survey-points">
-        <div class="survey-point">
+        <div class="survey-point water-hover">
           <i class="fas fa-check-circle"></i>
           <div>
             <h4>Boundary Accuracy</h4>
             <p>Precise boundary identification prevents future legal disputes.</p>
           </div>
         </div>
-        <div class="survey-point">
+        <div class="survey-point water-hover">
           <i class="fas fa-file-alt"></i>
           <div>
             <h4>Legal Documentation</h4>
             <p>Official certified reports accepted by courts and government bodies.</p>
           </div>
         </div>
-        <div class="survey-point">
+        <div class="survey-point water-hover">
           <i class="fas fa-tools"></i>
           <div>
             <h4>Modern Equipment</h4>
@@ -280,6 +322,13 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   </div>
 </section>
 
+<!-- WAVE DIVIDER -->
+<div class="wave-divider wave-divider-flip">
+  <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+    <path d="M0,60 C340,120 680,0 1020,80 C1200,120 1440,40 1440,60 L1440,120 L0,120 Z" class="wave-fill"></path>
+  </svg>
+</div>
+
 <!-- TESTIMONIALS -->
 <section class="testimonials">
   <div class="section-label">Client Feedback</div>
@@ -287,7 +336,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   <p class="section-subtitle">Trusted by hundreds of property owners across Bankura district</p>
 
   <div class="testimonials-grid">
-    <div class="testimonial-card fade-up">
+    <div class="testimonial-card water-hover fade-up">
       <div class="stars">★★★★★</div>
       <p>"Swarupananda sir completed our property boundary survey with exceptional accuracy. The report was ready in 2 days and fully accepted by the local authority."</p>
       <div class="testimonial-author">
@@ -298,7 +347,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
         </div>
       </div>
     </div>
-    <div class="testimonial-card fade-up">
+    <div class="testimonial-card water-hover fade-up">
       <div class="stars">★★★★★</div>
       <p>"The digital land survey was extremely precise. Got a georeferenced map with full documentation. Highly professional service at a fair price."</p>
       <div class="testimonial-author">
@@ -309,7 +358,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
         </div>
       </div>
     </div>
-    <div class="testimonial-card fade-up">
+    <div class="testimonial-card water-hover fade-up">
       <div class="stars">★★★★★</div>
       <p>"The AutoCAD plot sketch was exactly what we needed for the construction permit. Clean drawings, properly scaled. Will use again for the next plot."</p>
       <div class="testimonial-author">
@@ -323,17 +372,25 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   </div>
 </section>
 
+<!-- WAVE DIVIDER -->
+<div class="wave-divider">
+  <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
+    <path d="M0,40 C240,120 480,0 720,60 C960,120 1200,20 1440,80 L1440,120 L0,120 Z" class="wave-fill"></path>
+    <path d="M0,80 C300,20 600,100 900,50 C1200,0 1350,80 1440,50 L1440,120 L0,120 Z" class="wave-fill wave-fill-2"></path>
+  </svg>
+</div>
+
 <!-- BOOKING FORM -->
 <section id="contact">
   <div class="contact-inner">
 
-    <div class="contact-info-card fade-up">
+    <div class="contact-info-card water-hover fade-up">
       <div class="section-label">Get In Touch</div>
       <h2 class="section-title">Let's Start<br>Your Survey</h2>
       <p class="lead">Fill the form or reach us directly. We respond within 24 hours.</p>
 
       <div class="info-items">
-        <div class="info-item">
+        <div class="info-item water-hover">
           <div class="info-icon"><i class="fas fa-phone"></i></div>
           <div>
             <div class="info-label">Phone</div>
@@ -341,14 +398,14 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
             <div class="info-value" style="font-size:0.85rem;color:var(--text-muted)"><?= htmlspecialchars($phone2) ?></div>
           </div>
         </div>
-        <div class="info-item">
+        <div class="info-item water-hover">
           <div class="info-icon"><i class="fas fa-envelope"></i></div>
           <div>
             <div class="info-label">Email</div>
             <div class="info-value"><?= htmlspecialchars($email) ?></div>
           </div>
         </div>
-        <div class="info-item">
+        <div class="info-item water-hover">
           <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
           <div>
             <div class="info-label">Location</div>
@@ -358,29 +415,29 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       </div>
     </div>
 
-    <div class="form-card fade-up">
+    <div class="form-card water-hover fade-up">
       <h3>Book a Survey</h3>
       <form id="bookingForm" action="book.php" method="POST">
         <div class="form-row">
           <div class="form-group">
             <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" placeholder="Your full name" required>
+            <input type="text" id="name" name="name" placeholder="Your full name" required class="water-hover">
           </div>
           <div class="form-group">
             <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" placeholder="10-digit mobile" maxlength="10" required>
+            <input type="tel" id="phone" name="phone" placeholder="10-digit mobile" maxlength="10" required class="water-hover">
           </div>
         </div>
 
         <div class="form-group">
           <label for="location">Survey Location</label>
-          <input type="text" id="location" name="location" placeholder="Village / Town / District" required>
+          <input type="text" id="location" name="location" placeholder="Village / Town / District" required class="water-hover">
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="type">Survey Type</label>
-            <select id="type" name="type" required>
+            <select id="type" name="type" required class="water-hover">
               <option value="">Select service</option>
               <option value="Land Survey">Land Survey</option>
               <option value="Digital Land Survey">Digital Land Survey</option>
@@ -390,18 +447,18 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
           </div>
           <div class="form-group">
             <label for="date">Preferred Date</label>
-            <input type="date" id="date" name="date" required>
+            <input type="date" id="date" name="date" required class="water-hover">
           </div>
         </div>
 
         <div class="form-group">
           <label for="message">Additional Details</label>
-          <textarea id="message" name="message" placeholder="Any specific requirements or notes..."></textarea>
+          <textarea id="message" name="message" placeholder="Any specific requirements or notes..." class="water-hover"></textarea>
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-calendar-check"></i> Submit Booking</button>
-          <button type="button" class="btn btn-outline" onclick="payNow()"><i class="fas fa-rupee-sign"></i> Pay Advance</button>
+          <button type="submit" class="btn btn-primary water-hover"><i class="fas fa-calendar-check"></i> Submit Booking</button>
+          <button type="button" class="btn btn-outline water-hover" onclick="payNow()"><i class="fas fa-rupee-sign"></i> Pay Advance</button>
         </div>
 
         <div class="form-message" id="formMessage"></div>
@@ -413,6 +470,11 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 
 <!-- FOOTER -->
 <footer>
+  <div class="footer-wave">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,20 C240,60 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z" class="wave-fill"></path>
+    </svg>
+  </div>
   <div class="footer-inner">
     <div class="footer-logo">SG Survey</div>
     <p class="footer-copy">© <?= date('Y') ?> Swarupananda Ghosh. All rights reserved.</p>

@@ -1,36 +1,219 @@
 /* =============================================
-   SG SURVEY — Main Script (Premium Interactive)
+   SG SURVEY — Main Script (Water & Glass Effects)
    ============================================= */
 
 // =============================================
-// LOADER — hide as fast as possible
+// LOADER
 // =============================================
 function hideLoader() {
   const loader = document.getElementById('loader');
   if (loader) loader.classList.add('hidden');
 }
-// Hide immediately when DOM is ready
-document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 400));
-// Absolute failsafe — force-hide after 2 seconds no matter what
-setTimeout(hideLoader, 2000);
+document.addEventListener('DOMContentLoaded', () => setTimeout(hideLoader, 500));
+setTimeout(hideLoader, 2500);
 
 // =============================================
-// PARTICLES — floating ambient particles
+// WATER RIPPLE CANVAS — Full-screen interactive water
+// =============================================
+const waterCanvas = document.getElementById('waterCanvas');
+let waterCtx, waterWidth, waterHeight;
+let buffer1, buffer2;
+const DAMPING = 0.97;
+const waterDrops = [];
+
+function initWaterCanvas() {
+  if (!waterCanvas) return;
+  waterCtx = waterCanvas.getContext('2d');
+  resizeWaterCanvas();
+  window.addEventListener('resize', resizeWaterCanvas);
+}
+
+function resizeWaterCanvas() {
+  // Use low resolution for performance
+  const scale = 0.25;
+  waterWidth = Math.floor(window.innerWidth * scale);
+  waterHeight = Math.floor(window.innerHeight * scale);
+  waterCanvas.width = waterWidth;
+  waterCanvas.height = waterHeight;
+  waterCanvas.style.width = '100%';
+  waterCanvas.style.height = '100%';
+  buffer1 = new Float32Array(waterWidth * waterHeight);
+  buffer2 = new Float32Array(waterWidth * waterHeight);
+}
+
+function addWaterDrop(x, y, radius, strength) {
+  const sx = Math.floor(x * waterWidth / window.innerWidth);
+  const sy = Math.floor(y * waterHeight / window.innerHeight);
+  
+  for (let dy = -radius; dy <= radius; dy++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      const px = sx + dx;
+      const py = sy + dy;
+      if (px >= 0 && px < waterWidth && py >= 0 && py < waterHeight) {
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < radius) {
+          const amt = strength * (1 - dist / radius);
+          buffer1[py * waterWidth + px] += amt;
+        }
+      }
+    }
+  }
+}
+
+function updateWater() {
+  for (let y = 1; y < waterHeight - 1; y++) {
+    for (let x = 1; x < waterWidth - 1; x++) {
+      const i = y * waterWidth + x;
+      buffer2[i] = (
+        buffer1[i - 1] +
+        buffer1[i + 1] +
+        buffer1[i - waterWidth] +
+        buffer1[i + waterWidth]
+      ) / 2 - buffer2[i];
+      buffer2[i] *= DAMPING;
+    }
+  }
+  // Swap buffers
+  const temp = buffer1;
+  buffer1 = buffer2;
+  buffer2 = temp;
+}
+
+function renderWater() {
+  if (!waterCtx) return;
+  const imageData = waterCtx.createImageData(waterWidth, waterHeight);
+  const data = imageData.data;
+  const isLight = document.body.classList.contains('light');
+  
+  for (let y = 1; y < waterHeight - 1; y++) {
+    for (let x = 1; x < waterWidth - 1; x++) {
+      const i = y * waterWidth + x;
+      const val = buffer1[i];
+      const idx = i * 4;
+      
+      // Water-like highlight/shadow
+      const brightness = Math.max(0, Math.min(255, 128 + val * 400));
+      
+      if (isLight) {
+        // Light mode — subtle blue tint
+        data[idx]     = Math.floor(brightness * 0.65);  // R
+        data[idx + 1] = Math.floor(brightness * 0.8);   // G
+        data[idx + 2] = Math.floor(brightness * 1.0);   // B
+      } else {
+        // Dark mode — gold/white tint
+        data[idx]     = Math.floor(brightness * 0.9);    // R
+        data[idx + 1] = Math.floor(brightness * 0.8);    // G
+        data[idx + 2] = Math.floor(brightness * 0.5);    // B
+      }
+      data[idx + 3] = Math.floor(Math.abs(val) * 80);   // Alpha
+    }
+  }
+  
+  waterCtx.putImageData(imageData, 0, 0);
+}
+
+function waterLoop() {
+  updateWater();
+  renderWater();
+  requestAnimationFrame(waterLoop);
+}
+
+// Mouse movement creates water drops
+let lastWaterDrop = 0;
+document.addEventListener('mousemove', (e) => {
+  const now = Date.now();
+  if (now - lastWaterDrop > 50) { // Throttle
+    addWaterDrop(e.clientX, e.clientY, 3, 80);
+    lastWaterDrop = now;
+  }
+});
+
+// Click creates bigger splash
+document.addEventListener('click', (e) => {
+  addWaterDrop(e.clientX, e.clientY, 6, 200);
+});
+
+// Auto raindrops
+function autoRaindrop() {
+  if (waterWidth && waterHeight) {
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    addWaterDrop(x, y, 2, 40);
+  }
+  setTimeout(autoRaindrop, 2000 + Math.random() * 4000);
+}
+
+initWaterCanvas();
+if (waterCanvas) {
+  waterLoop();
+  setTimeout(autoRaindrop, 3000);
+}
+
+// =============================================
+// WATER HOVER — Track cursor position on elements
+// =============================================
+document.querySelectorAll('.water-hover').forEach(el => {
+  el.addEventListener('mousemove', (e) => {
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    el.style.setProperty('--mouse-x', x + 'px');
+    el.style.setProperty('--mouse-y', y + 'px');
+  });
+  
+  el.addEventListener('mouseleave', () => {
+    el.style.setProperty('--mouse-x', '50%');
+    el.style.setProperty('--mouse-y', '50%');
+  });
+});
+
+// =============================================
+// WATER DROP RINGS — On click create expanding rings
+// =============================================
+document.addEventListener('click', (e) => {
+  // Create 3 concentric ripple rings at click position
+  for (let i = 0; i < 3; i++) {
+    const ring = document.createElement('div');
+    ring.className = 'water-drop-ring';
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+    ring.style.position = 'fixed';
+    ring.style.animationDelay = (i * 0.15) + 's';
+    document.body.appendChild(ring);
+    setTimeout(() => ring.remove(), 1000);
+  }
+});
+
+// =============================================
+// PARTICLES & BUBBLES
 // =============================================
 function createParticles() {
   const container = document.createElement('div');
   container.className = 'particles-container';
   document.body.appendChild(container);
 
-  for (let i = 0; i < 30; i++) {
+  // Gold & blue particles
+  for (let i = 0; i < 25; i++) {
     const particle = document.createElement('div');
-    particle.className = 'particle';
+    particle.className = 'particle ' + (Math.random() > 0.5 ? 'gold' : 'blue');
     particle.style.left = Math.random() * 100 + '%';
     particle.style.width = particle.style.height = (Math.random() * 3 + 1) + 'px';
-    particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    particle.style.animationDuration = (Math.random() * 15 + 12) + 's';
     particle.style.animationDelay = (Math.random() * 15) + 's';
-    particle.style.opacity = 0;
     container.appendChild(particle);
+  }
+
+  // Water bubbles
+  for (let i = 0; i < 12; i++) {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.style.left = Math.random() * 100 + '%';
+    const size = Math.random() * 20 + 8;
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.animationDuration = (Math.random() * 20 + 15) + 's';
+    bubble.style.animationDelay = (Math.random() * 20) + 's';
+    container.appendChild(bubble);
   }
 }
 createParticles();
@@ -51,8 +234,8 @@ document.addEventListener('mousemove', e => {
 });
 
 function updateGlow() {
-  glowX += (mouseX - glowX) * 0.08;
-  glowY += (mouseY - glowY) * 0.08;
+  glowX += (mouseX - glowX) * 0.06;
+  glowY += (mouseY - glowY) * 0.06;
   cursorGlow.style.left = glowX + 'px';
   cursorGlow.style.top = glowY + 'px';
   requestAnimationFrame(updateGlow);
@@ -72,7 +255,7 @@ function addRipple(e) {
   ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
   ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
   btn.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 600);
+  setTimeout(() => ripple.remove(), 700);
 }
 
 document.querySelectorAll('.btn').forEach(btn => {
@@ -81,7 +264,7 @@ document.querySelectorAll('.btn').forEach(btn => {
 });
 
 // =============================================
-// TILT EFFECT — 3D card hover
+// TILT EFFECT — 3D water-like card hover
 // =============================================
 function addTiltEffect(elements) {
   elements.forEach(el => {
@@ -89,9 +272,9 @@ function addTiltEffect(elements) {
       const rect = el.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width;
       const y = (e.clientY - rect.top) / rect.height;
-      const rotateX = (y - 0.5) * -8;
-      const rotateY = (x - 0.5) * 8;
-      el.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+      const rotateX = (y - 0.5) * -6;
+      const rotateY = (x - 0.5) * 6;
+      el.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
     });
 
     el.addEventListener('mouseleave', () => {
@@ -106,11 +289,24 @@ function addTiltEffect(elements) {
   });
 }
 
-// Apply tilt to stats and survey points
 document.addEventListener('DOMContentLoaded', () => {
   addTiltEffect(document.querySelectorAll('.stat-item'));
   addTiltEffect(document.querySelectorAll('.survey-point'));
-  addTiltEffect(document.querySelectorAll('.pill'));
+  addTiltEffect(document.querySelectorAll('.testimonial-card'));
+  addTiltEffect(document.querySelectorAll('.info-item'));
+});
+
+// =============================================
+// WATER DISTORTION — on form inputs
+// =============================================
+document.querySelectorAll('.form-group input, .form-group select, .form-group textarea').forEach(field => {
+  field.addEventListener('focus', () => {
+    // Create ripple at the input position
+    const rect = field.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    addWaterDrop(cx, cy, 5, 120);
+  });
 });
 
 // =============================================
@@ -187,6 +383,8 @@ if (themeToggle) {
     const next    = current === 'light' ? 'dark' : 'light';
     localStorage.setItem('sg-theme', next);
     applyTheme(next);
+    // Create a big splash on theme toggle
+    addWaterDrop(window.innerWidth / 2, window.innerHeight / 2, 10, 300);
   });
 }
 
@@ -218,20 +416,17 @@ if (nextBtn) nextBtn.addEventListener('click', () => { goToSlide(currentSlide + 
 dotsEl.forEach((d, i) => d.addEventListener('click', () => { goToSlide(i); startTimer(); }));
 startTimer();
 
-// Touch/swipe support for slider
+// Touch/swipe support
 let touchStartX = 0;
-let touchEndX = 0;
 const sliderWrapper = document.querySelector('.slider-wrapper');
 if (sliderWrapper) {
   sliderWrapper.addEventListener('touchstart', e => {
     touchStartX = e.changedTouches[0].screenX;
   }, { passive: true });
   sliderWrapper.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    const diff = touchStartX - touchEndX;
+    const diff = touchStartX - e.changedTouches[0].screenX;
     if (Math.abs(diff) > 50) {
-      if (diff > 0) { goToSlide(currentSlide + 1); }
-      else { goToSlide(currentSlide - 1); }
+      diff > 0 ? goToSlide(currentSlide + 1) : goToSlide(currentSlide - 1);
       startTimer();
     }
   }, { passive: true });
@@ -245,23 +440,15 @@ function animateCounter(el) {
   const duration = 2000;
   const startTime = performance.now();
 
-  function easeOutQuart(t) {
-    return 1 - Math.pow(1 - t, 4);
-  }
+  function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
 
   const tick = (now) => {
     const elapsed = now - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    const easedProgress = easeOutQuart(progress);
-    const current = Math.floor(easedProgress * target);
-
+    const current = Math.floor(easeOutQuart(progress) * target);
     el.textContent = current + '+';
-
-    if (progress < 1) {
-      requestAnimationFrame(tick);
-    } else {
-      el.textContent = target + '+';
-    }
+    if (progress < 1) requestAnimationFrame(tick);
+    else el.textContent = target + '+';
   };
   requestAnimationFrame(tick);
 }
@@ -279,7 +466,7 @@ const statsObserver = new IntersectionObserver(entries => {
 statNumbers.forEach(el => statsObserver.observe(el));
 
 // =============================================
-// FADE-UP ON SCROLL — staggered
+// FADE-UP ON SCROLL
 // =============================================
 const fadeObserver = new IntersectionObserver(entries => {
   entries.forEach((entry, i) => {
@@ -317,7 +504,7 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
     const rect = btn.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = `translateY(-3px) translate(${x * 0.15}px, ${y * 0.15}px)`;
+    btn.style.transform = `translateY(-3px) translate(${x * 0.12}px, ${y * 0.12}px)`;
   });
   btn.addEventListener('mouseleave', () => {
     btn.style.transform = '';
@@ -339,17 +526,29 @@ document.addEventListener('DOMContentLoaded', () => {
       i++;
       if (i >= text.length) {
         clearInterval(typeInterval);
-        // Remove cursor after typing is done
-        setTimeout(() => {
-          eyebrow.style.borderRight = 'none';
-        }, 800);
+        setTimeout(() => { eyebrow.style.borderRight = 'none'; }, 800);
       }
     }, 60);
   }
 });
 
 // =============================================
-// BOOKING FORM — set min date
+// SCROLL-TRIGGERED WATER DROPS
+// =============================================
+let lastScrollY = 0;
+window.addEventListener('scroll', () => {
+  const scrollDelta = Math.abs(window.scrollY - lastScrollY);
+  if (scrollDelta > 30 && waterWidth) {
+    // Create random drops when scrolling fast
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    addWaterDrop(x, y, 2, scrollDelta * 0.5);
+  }
+  lastScrollY = window.scrollY;
+}, { passive: true });
+
+// =============================================
+// BOOKING FORM
 // =============================================
 const dateInput = document.getElementById('date');
 if (dateInput) {
@@ -363,9 +562,8 @@ if (phoneInput) {
   });
 }
 
-// AJAX form submit
-const bookingForm  = document.getElementById('bookingForm');
-const formMessage  = document.getElementById('formMessage');
+const bookingForm = document.getElementById('bookingForm');
+const formMessage = document.getElementById('formMessage');
 
 if (bookingForm) {
   bookingForm.addEventListener('submit', async e => {
@@ -383,6 +581,12 @@ if (bookingForm) {
         formMessage.className = 'form-message success';
         formMessage.textContent = 'Booking submitted successfully! We will contact you soon.';
         bookingForm.reset();
+        // Celebration splash
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            addWaterDrop(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 5, 150);
+          }, i * 200);
+        }
       } else if (text.includes('alert(')) {
         const match = text.match(/alert\('([^']+)'\)/);
         formMessage.className = 'form-message error';
@@ -401,18 +605,6 @@ if (bookingForm) {
       setTimeout(() => { if (formMessage) formMessage.style.display = 'none'; }, 6000);
     }
   });
-
-  // Floating label effect
-  bookingForm.querySelectorAll('input, textarea, select').forEach(field => {
-    field.addEventListener('focus', () => {
-      field.parentElement.classList.add('focused');
-    });
-    field.addEventListener('blur', () => {
-      if (!field.value) {
-        field.parentElement.classList.remove('focused');
-      }
-    });
-  });
 }
 
 // =============================================
@@ -427,15 +619,13 @@ function payNow() {
 }
 
 // =============================================
-// SMOOTH REVEAL — section dividers
+// PARALLAX SCROLL — badge rotation
 // =============================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Parallax scroll for hero badge
   const badge = document.querySelector('.hero-badge');
   if (badge) {
     window.addEventListener('scroll', () => {
-      const scrolled = window.scrollY;
-      badge.style.transform = `rotate(${scrolled * 0.02}deg)`;
+      badge.style.transform = `rotate(${window.scrollY * 0.02}deg)`;
     }, { passive: true });
   }
 });
