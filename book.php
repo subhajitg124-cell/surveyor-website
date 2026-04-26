@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'db.php';
+require_once 'mailer.php';
 
 function sanitizeInput($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
@@ -59,7 +60,7 @@ try {
     $stmt->execute([$name, $phone, $location, $surveyType, $date, $message]);
     $bookingId = $pdo->lastInsertId();
 
-    $_SESSION['booking_data'] = [
+    $bookingData = [
         'id'             => $bookingId,
         'name'           => $name,
         'phone'          => $phone,
@@ -69,8 +70,32 @@ try {
         'message'        => $message,
         'created_at'     => date('Y-m-d H:i:s'),
     ];
+    $_SESSION['booking_data'] = $bookingData;
 
-    respond(true, 'Booking saved.', ['id' => $bookingId]);
+    // ── AUTOMATION: notify owner via Email + WhatsApp ──
+    // Both calls are wrapped in try so a failure NEVER blocks the booking.
+    $notifyResults = ['email' => null, 'whatsapp' => null];
+    try {
+        $notifyResults['email'] = sendBookingEmail($bookingData);
+    } catch (\Throwable $e) {
+        error_log('sendBookingEmail exception: ' . $e->getMessage());
+        $notifyResults['email'] = ['success' => false, 'error' => 'exception'];
+    }
+    try {
+        $notifyResults['whatsapp'] = sendBookingWhatsApp($bookingData, '919749332827');
+    } catch (\Throwable $e) {
+        error_log('sendBookingWhatsApp exception: ' . $e->getMessage());
+        $notifyResults['whatsapp'] = ['success' => false, 'error' => 'exception'];
+    }
+    $_SESSION['notify_results'] = $notifyResults;
+
+    respond(true, 'Booking saved.', [
+        'id'      => $bookingId,
+        'notify'  => [
+            'email'    => !empty($notifyResults['email']['success']),
+            'whatsapp' => !empty($notifyResults['whatsapp']['success']),
+        ],
+    ]);
 
 } catch (Exception $e) {
     error_log("Booking error: " . $e->getMessage());

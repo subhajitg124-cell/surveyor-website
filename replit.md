@@ -40,12 +40,29 @@ A professional service website for **Swarupananda Ghosh**, a licensed land surve
 - The workflow "Start application" handles this automatically
 
 ## Key Features
-- Dark/light theme toggle
+- Light/dark theme toggle (light is default)
 - Animated landing page with glassmorphism design
-- Booking form with WhatsApp redirect notification
-- Protected admin dashboard (session-based auth)
+- Mobile-only animated background (color blobs, mesh gradient, floating shapes)
+- Scroll-progress bar + back-to-top button
+- Booking form saves to DB
+- **Automated owner notifications** on every booking:
+  - **Email** via Replit's email service (delivered to verified Replit account email)
+  - **WhatsApp** via CallMeBot if `CALLMEBOT_API_KEY` env var set; otherwise wa.me auto-open as fallback
+- Protected admin dashboard (session-based auth) with completed-booking auto-removal animation
 - Dynamic pricing (editable via admin panel)
 - Mobile responsive layout
+
+## Notification Setup Notes
+- **Email**: Goes to whatever email is verified on this Replit account. To send to abhijitghosh9749332827@gmail.com, that address must be the verified Replit-account email (or set up Gmail forwarding from the current verified address).
+- **WhatsApp automation (optional)**:
+  1. Owner sends `"I allow callmebot to send me messages"` from phone 9749332827 to **+34 644 51 95 23**
+  2. CallMeBot replies with a personal API key
+  3. Add it as a Replit secret: `CALLMEBOT_API_KEY=<key>` and restart workflow
+  4. Bookings will then auto-deliver to WhatsApp without any tap
+- Without API key, the booking-confirmation page still auto-opens wa.me/919749332827 with pre-filled details so owner just taps Send.
+
+## Files Added for Automation
+- `mailer.php` — `sendBookingEmail()` and `sendBookingWhatsApp()` helpers
 
 ## Admin Access
 - URL: `/admin-login.html`

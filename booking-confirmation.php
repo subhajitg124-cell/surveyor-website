@@ -160,16 +160,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
     <div class="confirmed-label"><i class="fas fa-circle" style="font-size:7px;"></i> Booking Confirmed</div>
     <h1>Thank You, <span><?= htmlspecialchars(explode(' ', $b['name'])[0]) ?>!</span></h1>
-    <p class="sub">Your survey request has been received and saved. We're notifying the surveyor on WhatsApp right now.</p>
+    <p class="sub">Your survey request has been received and saved. The surveyor has been notified automatically by email and WhatsApp.</p>
 
     <div class="booking-id"><i class="fas fa-hashtag"></i> Booking ID: <?= $b['id'] ?></div>
 
-    <!-- WhatsApp banner -->
+    <?php $notify = $_SESSION['notify_results'] ?? null; ?>
+    <!-- Notification status banner -->
     <div class="wa-banner">
       <div class="wa-icon"><i class="fab fa-whatsapp"></i></div>
       <div class="wa-text">
-        <div class="wa-title">Sending booking to surveyor</div>
-        <div class="wa-sub">Your details are being sent to the surveyor on WhatsApp. If it doesn't open automatically, tap the green button below.</div>
+        <div class="wa-title">
+          <?php if ($notify && !empty($notify['email']['success'])): ?>
+            ✓ Email notification sent to surveyor
+          <?php else: ?>
+            Sending booking to surveyor
+          <?php endif; ?>
+        </div>
+        <div class="wa-sub">
+          <?php if ($notify && !empty($notify['email']['success'])): ?>
+            Your booking details were emailed to the surveyor instantly. WhatsApp will open in a new tab — tap Send to confirm.
+          <?php else: ?>
+            Your details are being sent. If WhatsApp doesn't open automatically, tap the green button below.
+          <?php endif; ?>
+        </div>
       </div>
     </div>
 
