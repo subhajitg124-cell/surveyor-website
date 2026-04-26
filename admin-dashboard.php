@@ -519,24 +519,59 @@ function closeModalOnOverlay(e) {
 function updateStatus() {
   if (!currentBookingId) return;
   const status = document.getElementById('m_status_select').value;
+  const bookingId = currentBookingId;
   fetch('', {
     method:'POST',
     headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body: `action=update_status&id=${currentBookingId}&status=${status}`
+    body: `action=update_status&id=${bookingId}&status=${status}`
   }).then(r => r.json()).then(data => {
     if (data.success) {
-      showToast('Status updated to ' + status);
-      // Update badge in table
+      // Find all rows for this booking (dashboard recent + bookings table)
+      const targetRows = [];
       document.querySelectorAll('#bookingsTable tr, #view-dashboard tbody tr').forEach(row => {
-        if (row.dataset && row.getAttribute('onclick') && row.getAttribute('onclick').includes('"id":' + currentBookingId + ',')) {
+        if (row.getAttribute('onclick') && row.getAttribute('onclick').includes('"id":' + bookingId + ',')) {
+          targetRows.push(row);
+        }
+      });
+
+      if (status === 'completed') {
+        // ✓ Mark complete → animate row out & remove from view
+        showToast('✓ Booking completed and cleared from list');
+        closeModal();
+        targetRows.forEach(row => {
+          row.style.transition = 'opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, padding 0.5s ease';
+          row.style.maxHeight = row.offsetHeight + 'px';
+          row.style.background = 'rgba(34,197,94,0.12)';
+          // small delay to show the green flash
+          setTimeout(() => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(40px)';
+            row.style.maxHeight = '0';
+            row.style.padding = '0';
+            setTimeout(() => {
+              row.remove();
+              // Show empty state if no rows left in main bookings table
+              const tbody = document.getElementById('bookingsTable');
+              if (tbody && !tbody.querySelector('tr.booking-row')) {
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>No active bookings</div></td></tr>';
+              }
+            }, 500);
+          }, 250);
+        });
+      } else {
+        // Other statuses → just update badge & data attr
+        showToast('Status updated to ' + status);
+        targetRows.forEach(row => {
           const badge = row.querySelector('.badge');
           if (badge) {
             badge.className = 'badge badge-' + status;
             badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
           }
           row.dataset.status = status;
-        }
-      });
+        });
+      }
+    } else {
+      showToast('Error: ' + (data.error || 'unknown'));
     }
   }).catch(() => showToast('Error updating status'));
 }
