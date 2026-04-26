@@ -27,7 +27,14 @@ function getReplitIdentityToken(): ?string {
 
 /**
  * Send an email via the Replit Mail service.
- * The recipient is the user's verified Replit email (no `to` field is supported).
+ *
+ * IMPORTANT PLATFORM LIMITATION:
+ * The free Replit Mail service IGNORES the `to` field and ALWAYS delivers
+ * to the verified Replit account email (currently pixelsubhajit@gmail.com).
+ * To forward to abhijitghosh9749332827@gmail.com, set up a Gmail filter on
+ * the verified inbox: subject contains "New Booking" → forward to abhijit.
+ * Alternatively, swap this function to use SendGrid/Resend with an API key
+ * for true multi-recipient sending.
  */
 function sendBookingEmail(array $booking): array {
     $hostname = getenv('REPLIT_CONNECTORS_HOSTNAME') ?: 'connectors.replit.com';
@@ -35,6 +42,12 @@ function sendBookingEmail(array $booking): array {
     if (!$token) {
         return ['success' => false, 'error' => 'no_identity_token'];
     }
+
+    // Listed for clarity; the platform currently overrides this to the verified account email.
+    $recipients = [
+        'abhijitghosh9749332827@gmail.com',
+        'pixelsubhajit@gmail.com',
+    ];
 
     $subject = sprintf('🆕 New Booking #%d — %s', $booking['id'], $booking['name']);
     $bookedAt = date('d M Y, h:i A', strtotime($booking['created_at'] ?? 'now'));
@@ -83,6 +96,7 @@ function sendBookingEmail(array $booking): array {
 </div>';
 
     $payload = json_encode([
+        'to'      => $recipients,
         'subject' => $subject,
         'text'    => $text,
         'html'    => $html,

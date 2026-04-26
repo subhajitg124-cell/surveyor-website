@@ -8,9 +8,8 @@ if (!isset($_SESSION['booking_data'])) {
 
 $b = $_SESSION['booking_data'];
 unset($_SESSION['booking_data']);
-
-// Surveyor's WhatsApp number — bookings are auto-sent here
-$ownerPhone = '9749332827';
+$notify = $_SESSION['notify_results'] ?? null;
+unset($_SESSION['notify_results']);
 
 $typeIcons = [
     'Land Survey'     => 'fa-map',
@@ -20,23 +19,8 @@ $typeIcons = [
 ];
 $icon = $typeIcons[$b['survey_type']] ?? 'fa-clipboard-check';
 
-// Build the WhatsApp message that will be auto-sent to the owner
-$ownerMsg  = "*🆕 NEW BOOKING — SG SURVEY*\n";
-$ownerMsg .= "━━━━━━━━━━━━━━━━━━\n\n";
-$ownerMsg .= "*Booking ID:* #" . $b['id'] . "\n";
-$ownerMsg .= "*Name:* " . $b['name'] . "\n";
-$ownerMsg .= "*Phone:* " . $b['phone'] . "\n";
-$ownerMsg .= "*Location:* " . $b['location'] . "\n";
-$ownerMsg .= "*Survey Type:* " . $b['survey_type'] . "\n";
-$ownerMsg .= "*Preferred Date:* " . $b['preferred_date'] . "\n";
-if (!empty($b['message'])) {
-    $ownerMsg .= "*Message:* " . $b['message'] . "\n";
-}
-$ownerMsg .= "*Booked At:* " . date('d M Y, h:i A', strtotime($b['created_at'])) . "\n\n";
-$ownerMsg .= "_Sent automatically from sgsurvey.com_";
-
-$ownerMsgEncoded = urlencode($ownerMsg);
-$ownerWaUrl = "https://wa.me/91{$ownerPhone}?text={$ownerMsgEncoded}";
+$emailOk = !empty($notify['email']['success']);
+$waOk    = !empty($notify['whatsapp']['success']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -57,7 +41,6 @@ $ownerWaUrl = "https://wa.me/91{$ownerPhone}?text={$ownerMsgEncoded}";
   --accent:#c9a84c;
   --accent2:#e8c96e;
   --green:#22c55e;
-  --wa:#25D366;
   --text:#e8eaf0;
   --muted:#7a8099;
 }
@@ -87,13 +70,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 .booking-id{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--accent);padding:7px 16px;border-radius:30px;font-size:13px;font-weight:600;margin-bottom:24px;}
 
-/* WhatsApp banner */
-.wa-banner{background:linear-gradient(135deg,rgba(37,211,102,.12),rgba(18,140,126,.08));border:1px solid rgba(37,211,102,.25);border-radius:16px;padding:18px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;text-align:left;}
-.wa-icon{width:46px;height:46px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:white;flex-shrink:0;animation:waPulse 2s ease infinite;}
-@keyframes waPulse{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.4);}50%{box-shadow:0 0 0 10px rgba(37,211,102,0);}}
-.wa-text{flex:1;}
-.wa-title{font-size:14px;font-weight:600;margin-bottom:2px;}
-.wa-sub{font-size:12px;color:var(--muted);line-height:1.5;}
+/* Notify status banner */
+.notify-banner{background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(34,197,94,.04));border:1px solid rgba(34,197,94,.25);border-radius:16px;padding:18px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;text-align:left;}
+.notify-icon{width:46px;height:46px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:white;flex-shrink:0;animation:notifyPulse 2s ease infinite;}
+@keyframes notifyPulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4);}50%{box-shadow:0 0 0 10px rgba(34,197,94,0);}}
+.notify-text{flex:1;}
+.notify-title{font-size:14px;font-weight:600;margin-bottom:2px;}
+.notify-sub{font-size:12px;color:var(--muted);line-height:1.5;}
 
 .details{background:var(--card2);border:1px solid var(--border);border-radius:16px;text-align:left;overflow:hidden;margin-bottom:24px;}
 .detail-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
@@ -117,30 +100,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
 .actions{display:flex;flex-direction:column;gap:10px;}
-.btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 20px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;text-decoration:none;position:relative;overflow:hidden;}
-.btn-wa{background:linear-gradient(135deg,#25D366,#128C7E);color:white;box-shadow:0 8px 24px rgba(37,211,102,.3);}
-.btn-wa:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(37,211,102,.45);}
-.btn-wa::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.25),transparent);transform:translateX(-100%);animation:shine 2.5s ease infinite;}
-@keyframes shine{0%,100%{transform:translateX(-100%);}50%{transform:translateX(100%);}}
-.btn-home{background:var(--card2);color:var(--text);border:1px solid var(--border);}
-.btn-home:hover{background:var(--border);}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 20px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif;text-decoration:none;}
+.btn-home{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#111;box-shadow:0 8px 24px rgba(201,168,76,.25);}
+.btn-home:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(201,168,76,.4);}
 
 .countdown{font-size:12px;color:var(--muted);margin-top:14px;text-align:center;}
 .countdown span{color:var(--accent);font-weight:600;}
 
-/* Auto-send overlay */
-.auto-send-overlay{position:fixed;inset:0;background:rgba(10,12,18,.92);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
-.auto-send-overlay.show{opacity:1;pointer-events:all;}
-.auto-send-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 32px;text-align:center;max-width:380px;}
-.wa-loader{width:64px;height:64px;background:linear-gradient(135deg,#25D366,#128C7E);border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;animation:waLoaderPulse 1.5s ease infinite;}
-@keyframes waLoaderPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(37,211,102,.4);}50%{transform:scale(1.05);box-shadow:0 0 0 16px rgba(37,211,102,0);}}
-.auto-send-box h3{font-size:18px;margin-bottom:8px;}
-.auto-send-box p{font-size:13px;color:var(--muted);line-height:1.6;}
-
 @media(max-width:480px){
   .card{padding:24px 18px;}
   .card h1{font-size:22px;}
-  .wa-banner{flex-direction:column;text-align:center;}
+  .notify-banner{flex-direction:column;text-align:center;}
 }
 </style>
 </head>
@@ -160,27 +130,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
     <div class="confirmed-label"><i class="fas fa-circle" style="font-size:7px;"></i> Booking Confirmed</div>
     <h1>Thank You, <span><?= htmlspecialchars(explode(' ', $b['name'])[0]) ?>!</span></h1>
-    <p class="sub">Your survey request has been received and saved. The surveyor has been notified automatically by email and WhatsApp.</p>
+    <p class="sub">Your survey request has been received. The surveyor has been notified and will contact you shortly.</p>
 
     <div class="booking-id"><i class="fas fa-hashtag"></i> Booking ID: <?= $b['id'] ?></div>
 
-    <?php $notify = $_SESSION['notify_results'] ?? null; ?>
-    <!-- Notification status banner -->
-    <div class="wa-banner">
-      <div class="wa-icon"><i class="fab fa-whatsapp"></i></div>
-      <div class="wa-text">
-        <div class="wa-title">
-          <?php if ($notify && !empty($notify['email']['success'])): ?>
-            ✓ Email notification sent to surveyor
+    <!-- Silent notification status — no user action needed -->
+    <div class="notify-banner">
+      <div class="notify-icon"><i class="fas fa-paper-plane"></i></div>
+      <div class="notify-text">
+        <div class="notify-title">
+          <?php if ($emailOk): ?>
+            ✓ Surveyor notified successfully
           <?php else: ?>
-            Sending booking to surveyor
+            Notification queued
           <?php endif; ?>
         </div>
-        <div class="wa-sub">
-          <?php if ($notify && !empty($notify['email']['success'])): ?>
-            Your booking details were emailed to the surveyor instantly. WhatsApp will open in a new tab — tap Send to confirm.
+        <div class="notify-sub">
+          <?php if ($emailOk): ?>
+            Your booking details have been sent directly to the surveyor. Expect a callback within 24 hours.
           <?php else: ?>
-            Your details are being sent. If WhatsApp doesn't open automatically, tap the green button below.
+            Your booking is saved. The surveyor will be in touch shortly on <?= htmlspecialchars($b['phone']) ?>.
           <?php endif; ?>
         </div>
       </div>
@@ -251,49 +220,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
     <!-- Actions -->
     <div class="actions">
-      <a class="btn btn-wa" id="waBtn" href="<?= htmlspecialchars($ownerWaUrl) ?>" target="_blank" rel="noopener">
-        <i class="fab fa-whatsapp" style="font-size:20px;"></i> Send Booking to Surveyor on WhatsApp
-      </a>
       <a class="btn btn-home" href="index.php">
-        <i class="fas fa-arrow-left"></i> Back to Home
+        <i class="fas fa-home"></i> Back to Home
       </a>
     </div>
 
-    <div class="countdown">Auto-redirecting to home in <span id="timer">20</span>s</div>
-  </div>
-</div>
-
-<!-- Auto-send overlay -->
-<div class="auto-send-overlay" id="autoOverlay">
-  <div class="auto-send-box">
-    <div class="wa-loader"><i class="fab fa-whatsapp"></i></div>
-    <h3>Opening WhatsApp...</h3>
-    <p>Sending your booking details to the surveyor. Please tap <strong>Send</strong> when WhatsApp opens.</p>
+    <div class="countdown">Auto-redirecting to home in <span id="timer">15</span>s</div>
   </div>
 </div>
 
 <script>
-const ownerWaUrl = <?= json_encode($ownerWaUrl) ?>;
-
-// Try to auto-open WhatsApp on page load
-window.addEventListener('load', () => {
-  const overlay = document.getElementById('autoOverlay');
-  overlay.classList.add('show');
-
-  // Open WhatsApp in a new tab
-  setTimeout(() => {
-    const opened = window.open(ownerWaUrl, '_blank');
-    // If popup was blocked, fall back to top-level navigation
-    if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-      // Popup blocked — keep overlay so user can click button manually
-      console.log('Popup blocked — user must click button');
-    }
-    setTimeout(() => overlay.classList.remove('show'), 1500);
-  }, 800);
-});
-
-// Countdown
-let t = 20;
+let t = 15;
 const el = document.getElementById('timer');
 const interval = setInterval(() => {
   t--;
