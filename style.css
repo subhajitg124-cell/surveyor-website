@@ -133,93 +133,25 @@ h1, h2, h3, h4 {
 }
 
 /* =============================================
-   CUSTOM CURSOR — dot + ring (smooth, stable)
+   CURSOR SPOTLIGHT — soft ambient halo
+   (Native cursor preserved for usability)
    ============================================= */
 .cursor-glow {
   position: fixed;
-  width: 380px;
-  height: 380px;
+  width: 320px;
+  height: 320px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.06), rgba(100, 180, 255, 0.025) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.08), rgba(100, 180, 255, 0.03) 45%, transparent 75%);
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   top: 0; left: 0;
   transform: translate3d(-50%, -50%, 0);
   transition: opacity 0.4s ease;
   will-change: transform;
 }
 
-.cursor-dot,
-.cursor-ring {
-  position: fixed;
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 9998;
-  border-radius: 50%;
-  transform: translate3d(-50%, -50%, 0);
-  will-change: transform;
-}
-
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background: radial-gradient(circle, #e8c96e 0%, #c9a84c 60%, #b58c2a 100%);
-  box-shadow:
-    0 0 12px rgba(232, 201, 110, 0.85),
-    0 0 24px rgba(201, 168, 76, 0.5),
-    0 0 40px rgba(201, 168, 76, 0.25);
-  z-index: 9999;
-  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease, opacity 0.25s ease;
-}
-
-.cursor-ring {
-  width: 38px;
-  height: 38px;
-  border: 1.5px solid rgba(232, 201, 110, 0.55);
-  background: radial-gradient(circle, transparent 60%, rgba(201, 168, 76, 0.04));
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  transition: width 0.3s cubic-bezier(.34,1.56,.64,1),
-              height 0.3s cubic-bezier(.34,1.56,.64,1),
-              border-color 0.3s ease,
-              background 0.3s ease,
-              opacity 0.3s ease;
-}
-
-/* Hover state — over links, buttons, interactive */
-.cursor-ring.hover {
-  width: 60px;
-  height: 60px;
-  border-color: rgba(232, 201, 110, 0.95);
-  border-width: 2px;
-  background: radial-gradient(circle, transparent 55%, rgba(201, 168, 76, 0.12));
-}
-
-.cursor-dot.hover {
-  width: 4px;
-  height: 4px;
-  background: #ffffff;
-  box-shadow:
-    0 0 16px rgba(255, 255, 255, 0.95),
-    0 0 32px rgba(232, 201, 110, 0.6);
-}
-
-/* Click pulse */
-.cursor-ring.click {
-  width: 24px;
-  height: 24px;
-  border-color: rgba(232, 201, 110, 1);
-  background: rgba(201, 168, 76, 0.18);
-}
-
-/* Hide on touch devices */
 @media (hover: none), (pointer: coarse) {
-  .cursor-dot, .cursor-ring { display: none !important; }
-}
-
-/* Hide native cursor only on devices with hover */
-@media (hover: hover) and (pointer: fine) {
-  body, body * { cursor: none !important; }
+  .cursor-glow { display: none !important; }
 }
 
 /* =============================================
@@ -1349,7 +1281,10 @@ h1, h2, h3, h4 {
   background-clip: text;
 }
 
-.form-group { margin-bottom: 20px; }
+.form-group {
+  margin-bottom: 22px;
+  position: relative;
+}
 .form-group label {
   display: block;
   font-size: 0.78rem;
@@ -1358,12 +1293,25 @@ h1, h2, h3, h4 {
   color: var(--text-muted);
   margin-bottom: 8px;
   text-transform: uppercase;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
+.form-group:hover label,
+.form-group:focus-within label {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+/* ── Animated wrapper for inputs ── */
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background:
+    radial-gradient(circle at var(--mx, -100px) var(--my, -100px),
+                    rgba(201, 168, 76, 0.10) 0%,
+                    rgba(100, 180, 255, 0.04) 30%,
+                    transparent 55%),
+    rgba(255, 255, 255, 0.03);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 14px 18px;
@@ -1371,23 +1319,91 @@ h1, h2, h3, h4 {
   font-family: var(--font-body);
   font-size: 0.9rem;
   outline: none;
-  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  transition: border-color 0.35s ease,
+              background 0.4s ease,
+              box-shadow 0.35s ease,
+              transform 0.35s cubic-bezier(.34,1.56,.64,1);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  position: relative;
 }
+
+/* Hover — interactive lift + glow + soft border highlight */
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+  border-color: rgba(201, 168, 76, 0.35);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 18px rgba(201, 168, 76, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Focus — strong gold glow + subtle scale */
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: rgba(201, 168, 76, 0.5);
-  background: rgba(201, 168, 76, 0.03);
-  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08), 0 0 20px rgba(201, 168, 76, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-color: rgba(201, 168, 76, 0.7);
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+                    rgba(201, 168, 76, 0.14) 0%,
+                    rgba(100, 180, 255, 0.05) 35%,
+                    transparent 60%),
+    rgba(201, 168, 76, 0.04);
+  box-shadow:
+    0 0 0 4px rgba(201, 168, 76, 0.1),
+    0 8px 28px rgba(201, 168, 76, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
+
 .form-group input::placeholder,
 .form-group textarea::placeholder {
   color: rgba(142, 144, 162, 0.5);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.form-group input:focus::placeholder,
+.form-group textarea:focus::placeholder {
+  opacity: 0.4;
+  transform: translateX(4px);
 }
 .form-group select { appearance: none; cursor: pointer; }
-.form-group select option { background: var(--bg-secondary); }
+.form-group select option { background: var(--bg-secondary); color: var(--text-primary); }
 .form-group textarea { resize: vertical; min-height: 100px; }
+
+/* ── Animated underline that grows on focus ── */
+.form-group::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), #e8c96e, #4a9fd8);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(.65,0,.35,1);
+  pointer-events: none;
+  opacity: 0.85;
+}
+.form-group:focus-within::after {
+  transform: scaleX(1);
+}
+
+/* ── Animated icon shimmer on hover (left side glint) ── */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  position: relative;
+  z-index: 1;
+}
+
+/* Soft inner caret-line indicator on focus */
+.form-group input:focus,
+.form-group textarea:focus {
+  padding-left: 22px;
+  transition-property: border-color, background, box-shadow, transform, padding-left;
+}
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 

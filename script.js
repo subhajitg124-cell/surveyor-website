@@ -219,97 +219,33 @@ function createParticles() {
 createParticles();
 
 // =============================================
-// CUSTOM CURSOR — dot + ring + ambient glow
-// Touch-aware, GPU-accelerated, ultra-stable
+// CURSOR SPOTLIGHT — soft ambient glow that follows
+// (Native cursor is preserved — no custom replacement)
 // =============================================
 const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
 if (!isTouchDevice) {
-  // Ambient glow (large soft halo)
   const cursorGlow = document.createElement('div');
   cursorGlow.className = 'cursor-glow';
   document.body.appendChild(cursorGlow);
 
-  // Cursor ring (smooth lerp follow)
-  const cursorRing = document.createElement('div');
-  cursorRing.className = 'cursor-ring';
-  document.body.appendChild(cursorRing);
-
-  // Cursor dot (pixel-perfect follow)
-  const cursorDot = document.createElement('div');
-  cursorDot.className = 'cursor-dot';
-  document.body.appendChild(cursorDot);
-
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;
-  let ringX = mouseX, ringY = mouseY;
   let glowX = mouseX, glowY = mouseY;
-  let isVisible = false;
 
   document.addEventListener('mousemove', e => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    if (!isVisible) {
-      isVisible = true;
-      cursorDot.style.opacity = '1';
-      cursorRing.style.opacity = '1';
-      cursorGlow.style.opacity = '1';
-    }
+    cursorGlow.style.opacity = '1';
   }, { passive: true });
 
-  // Hide cursor when leaving viewport
-  document.addEventListener('mouseleave', () => {
-    cursorDot.style.opacity = '0';
-    cursorRing.style.opacity = '0';
-    cursorGlow.style.opacity = '0';
-    isVisible = false;
-  });
-  document.addEventListener('mouseenter', () => {
-    cursorDot.style.opacity = '1';
-    cursorRing.style.opacity = '1';
-    cursorGlow.style.opacity = '1';
-    isVisible = true;
-  });
+  document.addEventListener('mouseleave', () => { cursorGlow.style.opacity = '0'; });
+  document.addEventListener('mouseenter', () => { cursorGlow.style.opacity = '1'; });
 
-  // Click feedback
-  document.addEventListener('mousedown', () => cursorRing.classList.add('click'));
-  document.addEventListener('mouseup', () => cursorRing.classList.remove('click'));
-
-  // Hover detection on interactive elements
-  const hoverSelector = 'a, button, .btn, .nav-link, .dot, .slider-arrow, input, select, textarea, [onclick], [role="button"], .stat-item, .survey-point, .testimonial-card, .info-item, .theme-toggle, .mobile-toggle';
-  document.addEventListener('mouseover', e => {
-    if (e.target.closest(hoverSelector)) {
-      cursorRing.classList.add('hover');
-      cursorDot.classList.add('hover');
-    }
-  });
-  document.addEventListener('mouseout', e => {
-    if (e.target.closest(hoverSelector)) {
-      cursorRing.classList.remove('hover');
-      cursorDot.classList.remove('hover');
-    }
-  });
-
-  // Initial state hidden
-  cursorDot.style.opacity = '0';
-  cursorRing.style.opacity = '0';
-  cursorGlow.style.opacity = '0';
-
-  // Animation loop — single rAF for both layers (stable, GPU accelerated)
   function updateCursor() {
-    // Dot follows exactly (no lerp, locked to mouse)
-    cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
-
-    // Ring follows with smooth lerp
-    ringX += (mouseX - ringX) * 0.18;
-    ringY += (mouseY - ringY) * 0.18;
-    cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
-
-    // Glow follows with slower lerp
-    glowX += (mouseX - glowX) * 0.06;
-    glowY += (mouseY - glowY) * 0.06;
+    glowX += (mouseX - glowX) * 0.08;
+    glowY += (mouseY - glowY) * 0.08;
     cursorGlow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
-
     requestAnimationFrame(updateCursor);
   }
   updateCursor();
@@ -370,15 +306,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =============================================
-// WATER DISTORTION — on form inputs
+// FORM FIELD INTERACTIVE SPOTLIGHT
+// Mouse-tracking gradient + ripple on focus
 // =============================================
 document.querySelectorAll('.form-group input, .form-group select, .form-group textarea').forEach(field => {
+  // Track mouse position inside field for the spotlight gradient
+  field.addEventListener('mousemove', e => {
+    const rect = field.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    field.style.setProperty('--mx', x + '%');
+    field.style.setProperty('--my', y + '%');
+  });
+
+  field.addEventListener('mouseleave', () => {
+    field.style.setProperty('--mx', '-100px');
+    field.style.setProperty('--my', '-100px');
+  });
+
+  // Water ripple at field on focus
   field.addEventListener('focus', () => {
-    // Create ripple at the input position
     const rect = field.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
-    addWaterDrop(cx, cy, 5, 120);
+    if (typeof addWaterDrop === 'function') {
+      addWaterDrop(cx, cy, 5, 120);
+    }
+    field.style.setProperty('--mx', '50%');
+    field.style.setProperty('--my', '50%');
+  });
+
+  // Subtle "shimmer sweep" on hover-in
+  field.addEventListener('mouseenter', () => {
+    field.style.transition = 'border-color 0.35s ease, background 0.4s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(.34,1.56,.64,1), padding-left 0.35s ease';
   });
 });
 
@@ -447,7 +407,7 @@ function applyTheme(theme) {
   }
 }
 
-const savedTheme = localStorage.getItem('sg-theme') || 'dark';
+const savedTheme = localStorage.getItem('sg-theme') || 'light';
 applyTheme(savedTheme);
 
 if (themeToggle) {
