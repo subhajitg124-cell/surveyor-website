@@ -24,6 +24,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle DELETE booking via AJAX
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_booking') {
+    header('Content-Type: application/json');
+    $id = intval($_POST['id']);
+    if ($id <= 0) { echo json_encode(['success' => false, 'error' => 'invalid_id']); exit; }
+    try {
+        $stmt = $pdo->prepare("DELETE FROM bookings WHERE id = ?");
+        $stmt->execute([$id]);
+        echo json_encode(['success' => true, 'deleted' => $stmt->rowCount()]);
+    } catch (\Throwable $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
 // Handle save site data
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_site_data') {
     header('Content-Type: application/json');
@@ -191,6 +206,8 @@ tr.booking-row:hover{background:var(--card2);}
 .btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.2);}
 .btn-success{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2);}
 .btn-blue{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.2);}
+.btn-danger:hover{background:rgba(239,68,68,.25);transform:translateY(-1px);}
+.btn-icon-danger:hover{background:rgba(239,68,68,.18) !important;color:var(--red) !important;border-color:rgba(239,68,68,.3) !important;}
 
 /* ── SETTINGS ── */
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:22px;}
@@ -357,7 +374,8 @@ tr.booking-row:hover{background:var(--card2);}
                 <td style="font-size:11px;color:var(--muted);"><?= date('d M Y', strtotime($b['created_at'])) ?></td>
                 <td><span class="badge badge-<?= $b['status'] ?>"><?= ucfirst($b['status']) ?></span></td>
                 <td onclick="event.stopPropagation()">
-                  <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="openModal(<?= htmlspecialchars(json_encode($b), ENT_QUOTES) ?>)"><i class="fas fa-eye"></i></button>
+                  <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" title="View" onclick="openModal(<?= htmlspecialchars(json_encode($b), ENT_QUOTES) ?>)"><i class="fas fa-eye"></i></button>
+                  <button class="btn btn-ghost btn-icon-danger" style="padding:5px 10px;font-size:11px;margin-left:4px;" title="Delete" onclick="deleteBookingRow(<?= (int)$b['id'] ?>)"><i class="fas fa-trash"></i></button>
                 </td>
               </tr>
               <?php endforeach; ?>
@@ -427,6 +445,7 @@ tr.booking-row:hover{background:var(--card2);}
       <div class="modal-actions">
         <button class="btn btn-accent" id="m_whatsapp" onclick="openWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
         <button class="btn btn-blue" id="m_call" onclick="callClient()"><i class="fas fa-phone"></i> Call</button>
+        <button class="btn btn-danger" id="m_delete" onclick="deleteBooking()"><i class="fas fa-trash"></i> Delete</button>
         <button class="btn btn-ghost" onclick="closeModal()">Close</button>
       </div>
     </div>
@@ -574,6 +593,69 @@ function updateStatus() {
       showToast('Error: ' + (data.error || 'unknown'));
     }
   }).catch(() => showToast('Error updating status'));
+}
+
+// Delete booking from MODAL (uses currentBookingId)
+function deleteBooking() {
+  if (!currentBookingId) return;
+  const name = document.getElementById('m_name').textContent || 'this booking';
+  if (!confirm(`Permanently delete the booking for "${name}"?\n\nThis action CANNOT be undone.`)) return;
+  performDelete(currentBookingId);
+}
+
+// Delete booking from a TABLE ROW (icon trash button)
+function deleteBookingRow(id) {
+  if (!id) return;
+  if (!confirm('Permanently delete this booking?\n\nThis action CANNOT be undone.')) return;
+  performDelete(id);
+}
+
+// Shared delete worker — animates row out, calls API, removes from DOM
+function performDelete(id) {
+  // Find every row matching this booking (recent + bookings table)
+  const targetRows = [];
+  document.querySelectorAll('#bookingsTable tr, #view-dashboard tbody tr').forEach(row => {
+    if (row.getAttribute('onclick') && row.getAttribute('onclick').includes('"id":' + id + ',')) {
+      targetRows.push(row);
+    }
+  });
+
+  fetch('', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `action=delete_booking&id=${id}`
+  }).then(r => r.json()).then(data => {
+    if (!data.success) { showToast('Error: ' + (data.error || 'delete failed')); return; }
+
+    showToast('🗑 Booking #' + id + ' deleted permanently');
+    if (currentBookingId === id) closeModal();
+
+    targetRows.forEach(row => {
+      row.style.transition = 'opacity 0.4s ease, transform 0.4s ease, max-height 0.4s ease, padding 0.4s ease, background 0.3s ease';
+      row.style.maxHeight = row.offsetHeight + 'px';
+      row.style.background = 'rgba(239,68,68,0.15)';
+      setTimeout(() => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(-40px)';
+        row.style.maxHeight = '0';
+        row.style.padding = '0';
+        setTimeout(() => {
+          row.remove();
+          const tbody = document.getElementById('bookingsTable');
+          if (tbody && !tbody.querySelector('tr.booking-row')) {
+            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-inbox"></i>No bookings yet</div></td></tr>';
+          }
+        }, 400);
+      }, 200);
+    });
+
+    // Decrement Total Bookings stat counter on dashboard
+    const totalEl = document.querySelector('#view-dashboard .stat-card:first-child .stat-value');
+    if (totalEl) {
+      const cur = parseInt(totalEl.textContent || '0', 10);
+      if (!isNaN(cur) && cur > 0) totalEl.textContent = cur - 1;
+    }
+  }).catch(() => showToast('Network error — booking not deleted'));
 }
 
 // WhatsApp & Call

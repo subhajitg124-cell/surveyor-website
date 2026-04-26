@@ -91,6 +91,15 @@ function initializeDatabase($pdo) {
         ");
     }
 
+    // Ensure additional admin: abhijitghosh / Abhijit@97 (idempotent)
+    $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM admin_users WHERE username = 'abhijitghosh'");
+    $stmt->execute();
+    if (((int)$stmt->fetch()['cnt']) === 0) {
+        $hash = password_hash('Abhijit@97', PASSWORD_BCRYPT);
+        $insert = $pdo->prepare("INSERT INTO admin_users (username, password_hash, email, full_name) VALUES (?, ?, ?, ?)");
+        $insert->execute(['abhijitghosh', $hash, 'abhijitghosh9749332827@gmail.com', 'Abhijit Ghosh']);
+    }
+
     // Insert default site data if not exists
     $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM site_data");
     $stmt->execute();
