@@ -133,19 +133,93 @@ h1, h2, h3, h4 {
 }
 
 /* =============================================
-   CURSOR GLOW (follow effect via JS)
+   CUSTOM CURSOR — dot + ring (smooth, stable)
    ============================================= */
 .cursor-glow {
   position: fixed;
-  width: 400px;
-  height: 400px;
+  width: 380px;
+  height: 380px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.05), rgba(100, 180, 255, 0.02) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.06), rgba(100, 180, 255, 0.025) 40%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  transform: translate(-50%, -50%);
+  top: 0; left: 0;
+  transform: translate3d(-50%, -50%, 0);
   transition: opacity 0.4s ease;
-  will-change: left, top;
+  will-change: transform;
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9998;
+  border-radius: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #e8c96e 0%, #c9a84c 60%, #b58c2a 100%);
+  box-shadow:
+    0 0 12px rgba(232, 201, 110, 0.85),
+    0 0 24px rgba(201, 168, 76, 0.5),
+    0 0 40px rgba(201, 168, 76, 0.25);
+  z-index: 9999;
+  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+}
+
+.cursor-ring {
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid rgba(232, 201, 110, 0.55);
+  background: radial-gradient(circle, transparent 60%, rgba(201, 168, 76, 0.04));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: width 0.3s cubic-bezier(.34,1.56,.64,1),
+              height 0.3s cubic-bezier(.34,1.56,.64,1),
+              border-color 0.3s ease,
+              background 0.3s ease,
+              opacity 0.3s ease;
+}
+
+/* Hover state — over links, buttons, interactive */
+.cursor-ring.hover {
+  width: 60px;
+  height: 60px;
+  border-color: rgba(232, 201, 110, 0.95);
+  border-width: 2px;
+  background: radial-gradient(circle, transparent 55%, rgba(201, 168, 76, 0.12));
+}
+
+.cursor-dot.hover {
+  width: 4px;
+  height: 4px;
+  background: #ffffff;
+  box-shadow:
+    0 0 16px rgba(255, 255, 255, 0.95),
+    0 0 32px rgba(232, 201, 110, 0.6);
+}
+
+/* Click pulse */
+.cursor-ring.click {
+  width: 24px;
+  height: 24px;
+  border-color: rgba(232, 201, 110, 1);
+  background: rgba(201, 168, 76, 0.18);
+}
+
+/* Hide on touch devices */
+@media (hover: none), (pointer: coarse) {
+  .cursor-dot, .cursor-ring { display: none !important; }
+}
+
+/* Hide native cursor only on devices with hover */
+@media (hover: hover) and (pointer: fine) {
+  body, body * { cursor: none !important; }
 }
 
 /* =============================================

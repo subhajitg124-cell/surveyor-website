@@ -219,28 +219,101 @@ function createParticles() {
 createParticles();
 
 // =============================================
-// CURSOR GLOW — soft ambient light following cursor
+// CUSTOM CURSOR — dot + ring + ambient glow
+// Touch-aware, GPU-accelerated, ultra-stable
 // =============================================
-const cursorGlow = document.createElement('div');
-cursorGlow.className = 'cursor-glow';
-document.body.appendChild(cursorGlow);
+const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
 
-let mouseX = -500, mouseY = -500;
-let glowX = -500, glowY = -500;
+if (!isTouchDevice) {
+  // Ambient glow (large soft halo)
+  const cursorGlow = document.createElement('div');
+  cursorGlow.className = 'cursor-glow';
+  document.body.appendChild(cursorGlow);
 
-document.addEventListener('mousemove', e => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-});
+  // Cursor ring (smooth lerp follow)
+  const cursorRing = document.createElement('div');
+  cursorRing.className = 'cursor-ring';
+  document.body.appendChild(cursorRing);
 
-function updateGlow() {
-  glowX += (mouseX - glowX) * 0.06;
-  glowY += (mouseY - glowY) * 0.06;
-  cursorGlow.style.left = glowX + 'px';
-  cursorGlow.style.top = glowY + 'px';
-  requestAnimationFrame(updateGlow);
+  // Cursor dot (pixel-perfect follow)
+  const cursorDot = document.createElement('div');
+  cursorDot.className = 'cursor-dot';
+  document.body.appendChild(cursorDot);
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let ringX = mouseX, ringY = mouseY;
+  let glowX = mouseX, glowY = mouseY;
+  let isVisible = false;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!isVisible) {
+      isVisible = true;
+      cursorDot.style.opacity = '1';
+      cursorRing.style.opacity = '1';
+      cursorGlow.style.opacity = '1';
+    }
+  }, { passive: true });
+
+  // Hide cursor when leaving viewport
+  document.addEventListener('mouseleave', () => {
+    cursorDot.style.opacity = '0';
+    cursorRing.style.opacity = '0';
+    cursorGlow.style.opacity = '0';
+    isVisible = false;
+  });
+  document.addEventListener('mouseenter', () => {
+    cursorDot.style.opacity = '1';
+    cursorRing.style.opacity = '1';
+    cursorGlow.style.opacity = '1';
+    isVisible = true;
+  });
+
+  // Click feedback
+  document.addEventListener('mousedown', () => cursorRing.classList.add('click'));
+  document.addEventListener('mouseup', () => cursorRing.classList.remove('click'));
+
+  // Hover detection on interactive elements
+  const hoverSelector = 'a, button, .btn, .nav-link, .dot, .slider-arrow, input, select, textarea, [onclick], [role="button"], .stat-item, .survey-point, .testimonial-card, .info-item, .theme-toggle, .mobile-toggle';
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(hoverSelector)) {
+      cursorRing.classList.add('hover');
+      cursorDot.classList.add('hover');
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(hoverSelector)) {
+      cursorRing.classList.remove('hover');
+      cursorDot.classList.remove('hover');
+    }
+  });
+
+  // Initial state hidden
+  cursorDot.style.opacity = '0';
+  cursorRing.style.opacity = '0';
+  cursorGlow.style.opacity = '0';
+
+  // Animation loop — single rAF for both layers (stable, GPU accelerated)
+  function updateCursor() {
+    // Dot follows exactly (no lerp, locked to mouse)
+    cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+
+    // Ring follows with smooth lerp
+    ringX += (mouseX - ringX) * 0.18;
+    ringY += (mouseY - ringY) * 0.18;
+    cursorRing.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+
+    // Glow follows with slower lerp
+    glowX += (mouseX - glowX) * 0.06;
+    glowY += (mouseY - glowY) * 0.06;
+    cursorGlow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
+
+    requestAnimationFrame(updateCursor);
+  }
+  updateCursor();
 }
-updateGlow();
 
 // =============================================
 // RIPPLE EFFECT — on all buttons
@@ -574,32 +647,35 @@ if (bookingForm) {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
     try {
-      const resp = await fetch('book.php', { method: 'POST', body: new FormData(bookingForm) });
-      const text = await resp.text();
+      const fd = new FormData(bookingForm);
+      const resp = await fetch('book.php', {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await resp.json();
 
-      if (text.includes('Booking Successful')) {
+      if (data.success) {
         formMessage.className = 'form-message success';
-        formMessage.textContent = 'Booking submitted successfully! We will contact you soon.';
-        bookingForm.reset();
+        formMessage.textContent = 'Booking confirmed! Redirecting...';
         // Celebration splash
         for (let i = 0; i < 5; i++) {
           setTimeout(() => {
             addWaterDrop(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 5, 150);
           }, i * 200);
         }
-      } else if (text.includes('alert(')) {
-        const match = text.match(/alert\('([^']+)'\)/);
-        formMessage.className = 'form-message error';
-        formMessage.textContent = match ? match[1] : 'Validation error. Please check your input.';
+        // Redirect to confirmation page (which auto-sends WhatsApp to owner)
+        setTimeout(() => { window.location.href = 'booking-confirmation.php'; }, 800);
       } else {
-        formMessage.className = 'form-message success';
-        formMessage.textContent = 'Booking submitted! We will contact you soon.';
-        bookingForm.reset();
+        formMessage.className = 'form-message error';
+        formMessage.textContent = data.message || 'Validation error. Please check your input.';
+        btn.disabled = false;
+        btn.innerHTML = orig;
+        setTimeout(() => { if (formMessage) formMessage.style.display = 'none'; }, 6000);
       }
     } catch (err) {
       formMessage.className = 'form-message error';
       formMessage.textContent = 'Network error. Please try again.';
-    } finally {
       btn.disabled = false;
       btn.innerHTML = orig;
       setTimeout(() => { if (formMessage) formMessage.style.display = 'none'; }, 6000);

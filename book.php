@@ -6,6 +6,26 @@ function sanitizeInput($data) {
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
 
+$isAjax = (
+    isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+);
+
+function respond($success, $message = '', $extra = []) {
+    global $isAjax;
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
+        exit;
+    }
+    if ($success) {
+        header('Location: booking-confirmation.php');
+    } else {
+        echo "<script>alert(" . json_encode($message) . ");history.back();</script>";
+    }
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
     exit;
@@ -26,8 +46,7 @@ if (!$surveyType)                             $errors[] = "Survey type is requir
 if (!$date)                                   $errors[] = "Preferred date is required.";
 
 if (!empty($errors)) {
-    echo "<script>alert('" . implode("\\n", $errors) . "');history.back();</script>";
-    exit;
+    respond(false, implode(' ', $errors));
 }
 
 try {
@@ -41,19 +60,19 @@ try {
     $bookingId = $pdo->lastInsertId();
 
     $_SESSION['booking_data'] = [
-        'id'          => $bookingId,
-        'name'        => $name,
-        'phone'       => $phone,
-        'location'    => $location,
-        'survey_type' => $surveyType,
+        'id'             => $bookingId,
+        'name'           => $name,
+        'phone'          => $phone,
+        'location'       => $location,
+        'survey_type'    => $surveyType,
         'preferred_date' => $date,
-        'message'     => $message,
+        'message'        => $message,
+        'created_at'     => date('Y-m-d H:i:s'),
     ];
 
-    header('Location: booking-confirmation.php');
-    exit;
+    respond(true, 'Booking saved.', ['id' => $bookingId]);
 
 } catch (Exception $e) {
-    echo "<script>alert('Sorry, something went wrong. Please try again.');history.back();</script>";
+    error_log("Booking error: " . $e->getMessage());
+    respond(false, 'Sorry, something went wrong. Please try again.');
 }
-?>
