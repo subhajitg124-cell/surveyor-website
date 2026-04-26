@@ -47,6 +47,18 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   <div class="orb orb-3"></div>
 </div>
 
+<!-- MOBILE-ONLY ANIMATED BACKGROUND -->
+<div class="mobile-bg" aria-hidden="true">
+  <div class="m-blob b1"></div>
+  <div class="m-blob b2"></div>
+  <div class="m-blob b3"></div>
+  <span class="m-shape s1"></span>
+  <span class="m-shape s2"></span>
+  <span class="m-shape s3"></span>
+  <span class="m-shape s4"></span>
+  <span class="m-shape s5"></span>
+</div>
+
 <!-- ANIMATED WATER WAVES BACKGROUND -->
 <div class="water-waves-bg">
   <svg class="water-wave water-wave-1" viewBox="0 0 1440 320" preserveAspectRatio="none">
@@ -482,7 +494,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
       <a href="#home">Home</a>
       <a href="#services">Services</a>
       <a href="#contact">Contact</a>
-      <a href="admin-login.html">Admin</a>
+      <a href="admin-login.html" class="admin-link"><i class="fas fa-lock"></i> Admin</a>
     </div>
   </div>
 </footer>
@@ -491,6 +503,14 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 <a href="https://wa.me/91<?= htmlspecialchars($phone) ?>" class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
   <i class="fab fa-whatsapp"></i>
 </a>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Back to top">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
+<!-- SCROLL PROGRESS BAR -->
+<div class="scroll-progress" id="scrollProgress"></div>
 
 <script src="script.js"></script>
 </body>

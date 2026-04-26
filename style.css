@@ -1482,7 +1482,7 @@ footer {
 .footer-links a:hover::after { width: 100%; }
 
 /* =============================================
-   WHATSAPP FAB
+   WHATSAPP FAB — auto-shifts up near footer
    ============================================= */
 .whatsapp-float {
   position: fixed;
@@ -1496,12 +1496,20 @@ footer {
   text-decoration: none;
   box-shadow: 0 8px 25px rgba(37,211,102,0.35), 0 0 40px rgba(37,211,102,0.1);
   z-index: 50;
-  transition: var(--transition);
+  transition: bottom 0.45s cubic-bezier(.65,0,.35,1),
+              right 0.45s cubic-bezier(.65,0,.35,1),
+              opacity 0.35s ease,
+              transform 0.3s ease,
+              box-shadow 0.3s ease;
   animation: fabFloat 3s ease-in-out infinite;
 }
 .whatsapp-float:hover {
   transform: scale(1.12);
   box-shadow: 0 12px 35px rgba(37,211,102,0.45), 0 0 60px rgba(37,211,102,0.15);
+}
+/* Slides up when the footer enters view so it never covers Admin link */
+.whatsapp-float.lifted {
+  bottom: 130px;
 }
 @keyframes fabFloat {
   0%, 100% { transform: translateY(0); }
@@ -1519,6 +1527,174 @@ footer {
   0% { transform: scale(1); opacity: 0.6; }
   100% { transform: scale(1.4); opacity: 0; }
 }
+
+/* =============================================
+   BACK-TO-TOP BUTTON
+   ============================================= */
+.back-to-top {
+  position: fixed;
+  bottom: 30px; left: 30px;
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, var(--accent), #b58c2a);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px) scale(0.8);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(.34,1.56,.64,1), bottom 0.45s cubic-bezier(.65,0,.35,1);
+  box-shadow: 0 8px 24px rgba(201,168,76,0.35);
+  z-index: 50;
+}
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.back-to-top:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(201,168,76,0.5);
+}
+.back-to-top.lifted { bottom: 130px; }
+
+/* =============================================
+   SCROLL PROGRESS BAR (top of page)
+   ============================================= */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #c9a84c, #e8c96e, #4a9fd8);
+  box-shadow: 0 0 8px rgba(201,168,76,0.6);
+  z-index: 9999;
+  transition: width 0.1s linear;
+  border-radius: 0 3px 3px 0;
+}
+
+/* =============================================
+   MOBILE-ONLY ANIMATED BACKGROUND
+   Floating geometric blobs + mesh gradient
+   ============================================= */
+.mobile-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.mobile-bg .m-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  animation: mBlobFloat 18s ease-in-out infinite;
+}
+.mobile-bg .m-blob.b1 {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, #c9a84c, transparent 65%);
+  top: -80px; left: -80px;
+  animation-delay: 0s;
+}
+.mobile-bg .m-blob.b2 {
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, #4a9fd8, transparent 65%);
+  top: 40%; right: -100px;
+  animation-delay: -6s;
+  animation-duration: 22s;
+}
+.mobile-bg .m-blob.b3 {
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, #25d366, transparent 70%);
+  bottom: -60px; left: 20%;
+  animation-delay: -12s;
+  opacity: 0.35;
+  animation-duration: 26s;
+}
+@keyframes mBlobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, -30px) scale(1.1); }
+  66%      { transform: translate(-30px, 40px) scale(0.95); }
+}
+
+/* Mesh-gradient overlay (subtle aurora) */
+.mobile-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(201,168,76,0.08), transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(74,159,216,0.08), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(37,211,102,0.04), transparent 60%);
+  animation: meshShift 20s ease-in-out infinite alternate;
+}
+@keyframes meshShift {
+  0%   { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.15) translate(-20px, -20px); }
+}
+
+/* Floating mini-icons (geometric shapes drifting up) */
+.mobile-bg .m-shape {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  opacity: 0;
+  animation: shapeRise 14s linear infinite;
+}
+.mobile-bg .m-shape.s1 { left: 12%; background: rgba(201,168,76,0.5); animation-delay: 0s; }
+.mobile-bg .m-shape.s2 { left: 32%; background: rgba(74,159,216,0.5); animation-delay: -3s; transform: rotate(45deg); }
+.mobile-bg .m-shape.s3 { left: 52%; background: rgba(37,211,102,0.4); border-radius: 50%; animation-delay: -6s; }
+.mobile-bg .m-shape.s4 { left: 72%; background: rgba(201,168,76,0.5); animation-delay: -9s; transform: rotate(45deg); }
+.mobile-bg .m-shape.s5 { left: 88%; background: rgba(74,159,216,0.4); border-radius: 50%; animation-delay: -12s; }
+@keyframes shapeRise {
+  0%   { bottom: -20px; opacity: 0; transform: translateX(0) rotate(0deg); }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.5; }
+  100% { bottom: 110vh; opacity: 0; transform: translateX(60px) rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .mobile-bg { display: block; }
+  /* Soften / hide heavy desktop orbs on mobile to give the new bg space */
+  .bg-orbs { opacity: 0.4; }
+}
+
+/* Touch-tap ripple — visual feedback for mobile taps on cards/buttons */
+.tap-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.35);
+  transform: scale(0);
+  animation: tapRippleAnim 0.6s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes tapRippleAnim {
+  to { transform: scale(3); opacity: 0; }
+}
+
+/* Admin link styling — small icon badge */
+.footer-links a.admin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(201, 168, 76, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  font-size: 0.82rem;
+  transition: var(--transition);
+}
+.footer-links a.admin-link:hover {
+  background: rgba(201, 168, 76, 0.22);
+  border-color: rgba(201, 168, 76, 0.5);
+  transform: translateY(-2px);
+}
+.footer-links a.admin-link i { font-size: 0.75rem; }
 
 /* =============================================
    LIGHT MODE — Improved bright aqua theme

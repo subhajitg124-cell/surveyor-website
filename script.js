@@ -665,3 +665,96 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 });
+
+// =============================================
+// SCROLL PROGRESS BAR
+// =============================================
+const scrollProgress = document.getElementById('scrollProgress');
+if (scrollProgress) {
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    scrollProgress.style.width = scrolled + '%';
+  }, { passive: true });
+}
+
+// =============================================
+// BACK TO TOP BUTTON
+// =============================================
+const backToTop = document.getElementById('backToTop');
+if (backToTop) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) backToTop.classList.add('visible');
+    else backToTop.classList.remove('visible');
+  }, { passive: true });
+
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+// =============================================
+// WHATSAPP FLOAT — auto-lift when footer in view
+// (so it never covers the Admin link)
+// =============================================
+const waFloat = document.querySelector('.whatsapp-float');
+const footerEl = document.querySelector('footer');
+if (waFloat && footerEl && 'IntersectionObserver' in window) {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        waFloat.classList.add('lifted');
+        if (backToTop) backToTop.classList.add('lifted');
+      } else {
+        waFloat.classList.remove('lifted');
+        if (backToTop) backToTop.classList.remove('lifted');
+      }
+    });
+  }, { rootMargin: '0px 0px -40px 0px', threshold: 0.01 });
+  obs.observe(footerEl);
+}
+
+// =============================================
+// MOBILE TAP RIPPLE — visual touch feedback
+// =============================================
+if (window.matchMedia('(hover: none), (pointer: coarse)').matches) {
+  const rippleSelector = '.btn, .service-card, .testimonial-card, .info-item, .stat-item, .nav-link, .footer-links a';
+  document.addEventListener('touchstart', (e) => {
+    const target = e.target.closest(rippleSelector);
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const touch = e.touches[0];
+    const ripple = document.createElement('span');
+    ripple.className = 'tap-ripple';
+    const size = Math.max(rect.width, rect.height) * 0.6;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (touch.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (touch.clientY - rect.top - size / 2) + 'px';
+    const prevPos = getComputedStyle(target).position;
+    if (prevPos === 'static') target.style.position = 'relative';
+    const prevOverflow = getComputedStyle(target).overflow;
+    if (prevOverflow !== 'hidden') target.style.overflow = 'hidden';
+    target.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 650);
+  }, { passive: true });
+}
+
+// =============================================
+// MOBILE PARALLAX — gentle background blob drift on scroll
+// =============================================
+if (window.matchMedia('(max-width: 900px)').matches) {
+  const blobs = document.querySelectorAll('.mobile-bg .m-blob');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      blobs.forEach((b, i) => {
+        const speed = (i + 1) * 0.08;
+        b.style.translate = `0 ${y * speed}px`;
+      });
+      ticking = false;
+    });
+  }, { passive: true });
+}
