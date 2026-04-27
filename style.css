@@ -2081,6 +2081,84 @@ body.light .section-label {
 }
 
 /* =============================================
+   DESKTOP FLOATING BACKGROUND ICONS
+   Surveyor-themed icons that drift slowly + react to cursor proximity.
+   Hidden on mobile (mobile already has its own floating background).
+   ============================================= */
+.floating-bg { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .floating-bg {
+    display: block;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .float-icon {
+    position: absolute;
+    color: rgba(201, 168, 76, 0.85);
+    opacity: 0.09;
+    pointer-events: none;
+    transition:
+      opacity 0.5s ease,
+      color 0.5s ease,
+      filter 0.5s ease,
+      transform 0.6s cubic-bezier(.34, 1.56, .64, 1);
+    will-change: transform, opacity;
+  }
+  /* "near" = cursor within ~110px → icon wakes up */
+  .float-icon.near {
+    opacity: 0.65 !important;
+    color: var(--accent2, #e8c96e);
+    filter: drop-shadow(0 0 16px rgba(201, 168, 76, 0.7));
+    transform: scale(1.7) rotate(20deg) !important;
+    animation-play-state: paused;
+  }
+  /* Light mode tuning — switch to deep-blue accent */
+  body.light .float-icon { color: rgba(30, 74, 127, 0.55); opacity: 0.11; }
+  body.light .float-icon.near {
+    color: #0d2040;
+    opacity: 0.78 !important;
+    filter: drop-shadow(0 0 16px rgba(30, 74, 127, 0.5));
+  }
+
+  /* Position + size + drift animation per icon (mostly screen edges) */
+  .fb-1  { top:  7%; left:  3%; font-size: 36px; animation: fbDrift1  28s ease-in-out infinite; }
+  .fb-2  { top: 22%; left: 94%; font-size: 42px; animation: fbDrift2  34s ease-in-out infinite; }
+  .fb-3  { top: 38%; left:  2%; font-size: 30px; animation: fbDrift3  30s ease-in-out infinite; }
+  .fb-4  { top: 52%; left: 96%; font-size: 38px; animation: fbDrift4  36s ease-in-out infinite; }
+  .fb-5  { top: 68%; left:  4%; font-size: 28px; animation: fbDrift5  32s ease-in-out infinite; }
+  .fb-6  { top: 84%; left: 92%; font-size: 40px; animation: fbDrift6  38s ease-in-out infinite; }
+  .fb-7  { top: 12%; left: 50%; font-size: 26px; animation: fbDrift7  40s ease-in-out infinite; }
+  .fb-8  { top: 90%; left: 22%; font-size: 30px; animation: fbDrift8  44s ease-in-out infinite; }
+  .fb-9  { top: 90%; left: 75%; font-size: 32px; animation: fbDrift9  36s ease-in-out infinite; }
+  .fb-10 { top: 26%; left: 80%; font-size: 28px; animation: fbDrift10 34s ease-in-out infinite; }
+  .fb-11 { top: 60%; left: 12%; font-size: 32px; animation: fbDrift11 42s ease-in-out infinite; }
+  .fb-12 { top: 75%; left: 50%; font-size: 36px; animation: fbDrift12 46s ease-in-out infinite; }
+
+  @keyframes fbDrift1  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate( 60px,-40px) rotate( 25deg); } }
+  @keyframes fbDrift2  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-50px, 50px) rotate(-20deg); } }
+  @keyframes fbDrift3  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate( 40px, 60px) rotate( 15deg); } }
+  @keyframes fbDrift4  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-60px,-30px) rotate(-30deg); } }
+  @keyframes fbDrift5  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate( 50px,-50px) rotate( 18deg); } }
+  @keyframes fbDrift6  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-40px, 30px) rotate(-12deg); } }
+  @keyframes fbDrift7  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate( 30px,-60px) rotate( 22deg); } }
+  @keyframes fbDrift8  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-50px, 40px) rotate(-25deg); } }
+  @keyframes fbDrift9  { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate( 60px, 50px) rotate( 30deg); } }
+  @keyframes fbDrift10 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-30px,-50px) rotate(-18deg); } }
+  @keyframes fbDrift11 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate( 45px, 30px) rotate( 20deg); } }
+  @keyframes fbDrift12 { 0%,100% { transform: translate(0,0) rotate(0deg); } 50% { transform: translate(-55px,-45px) rotate(-22deg); } }
+
+  /* Subtle parallax-pull on background orbs (set by JS) */
+  .bg-orbs {
+    transform: translate3d(var(--orb-px, 0px), var(--orb-py, 0px), 0);
+    transition: transform 0.6s cubic-bezier(.22, 1, .36, 1);
+  }
+}
+
+/* =============================================
    DESKTOP OVERRIDES — kill water ripple + cursor effects on PC
    (per user request: keep mobile behavior unchanged)
    ============================================= */

@@ -159,6 +159,51 @@ if (!IS_DESKTOP) {
 }
 
 // =============================================
+// FLOATING BACKGROUND ICONS — cursor proximity reaction (desktop only)
+// Icons "wake up" (scale + glow) when the cursor comes within ~110px.
+// Plus subtle parallax pull on the background orbs.
+// =============================================
+if (IS_DESKTOP) {
+  const floatIcons = document.querySelectorAll('.float-icon');
+  const orbsLayer  = document.querySelector('.bg-orbs');
+  const PROXIMITY  = 130; // px — cursor distance to trigger "near"
+  let mx = -9999, my = -9999, ticking = false;
+
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(updateInteractiveBg);
+    }
+  }, { passive: true });
+
+  function updateInteractiveBg() {
+    // 1) Icon proximity
+    floatIcons.forEach(icon => {
+      const r = icon.getBoundingClientRect();
+      const cx = r.left + r.width  / 2;
+      const cy = r.top  + r.height / 2;
+      const dx = mx - cx;
+      const dy = my - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < PROXIMITY) icon.classList.add('near');
+      else                  icon.classList.remove('near');
+    });
+
+    // 2) Subtle orb parallax — orbs drift opposite to cursor (~12px max)
+    if (orbsLayer) {
+      const ox = ((mx / window.innerWidth)  - 0.5) * -24;
+      const oy = ((my / window.innerHeight) - 0.5) * -24;
+      orbsLayer.style.setProperty('--orb-px', ox.toFixed(1) + 'px');
+      orbsLayer.style.setProperty('--orb-py', oy.toFixed(1) + 'px');
+    }
+
+    ticking = false;
+  }
+}
+
+// =============================================
 // WATER HOVER — Track cursor position on elements
 // =============================================
 document.querySelectorAll('.water-hover').forEach(el => {

@@ -47,6 +47,22 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
   <div class="orb orb-3"></div>
 </div>
 
+<!-- DESKTOP-ONLY: Floating surveyor-themed background icons (react to cursor) -->
+<div class="floating-bg" aria-hidden="true">
+  <i class="float-icon fb-1  fas fa-compass"></i>
+  <i class="float-icon fb-2  fas fa-ruler-combined"></i>
+  <i class="float-icon fb-3  fas fa-map-marked-alt"></i>
+  <i class="float-icon fb-4  fas fa-drafting-compass"></i>
+  <i class="float-icon fb-5  fas fa-vector-square"></i>
+  <i class="float-icon fb-6  fas fa-mountain"></i>
+  <i class="float-icon fb-7  fas fa-map"></i>
+  <i class="float-icon fb-8  fas fa-location-dot"></i>
+  <i class="float-icon fb-9  fas fa-satellite-dish"></i>
+  <i class="float-icon fb-10 fas fa-route"></i>
+  <i class="float-icon fb-11 fas fa-layer-group"></i>
+  <i class="float-icon fb-12 fas fa-globe-asia"></i>
+</div>
+
 <!-- MOBILE-ONLY ANIMATED BACKGROUND -->
 <div class="mobile-bg" aria-hidden="true">
   <div class="m-blob b1"></div>
