@@ -41,7 +41,13 @@ function resizeWaterCanvas() {
   buffer2 = new Float32Array(waterWidth * waterHeight);
 }
 
+// Desktop devices have the water ripple effect disabled (per user request).
+// Touch/mobile devices keep it for tactile feedback.
+const IS_DESKTOP = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
 function addWaterDrop(x, y, radius, strength) {
+  if (IS_DESKTOP) return; // No ripples on PC
+  if (!waterWidth || !waterHeight) return;
   const sx = Math.floor(x * waterWidth / window.innerWidth);
   const sy = Math.floor(y * waterHeight / window.innerHeight);
   
@@ -143,10 +149,13 @@ function autoRaindrop() {
   setTimeout(autoRaindrop, 2000 + Math.random() * 4000);
 }
 
-initWaterCanvas();
-if (waterCanvas) {
-  waterLoop();
-  setTimeout(autoRaindrop, 3000);
+// Skip the entire water simulation on desktop (saves CPU + GPU)
+if (!IS_DESKTOP) {
+  initWaterCanvas();
+  if (waterCanvas) {
+    waterLoop();
+    setTimeout(autoRaindrop, 3000);
+  }
 }
 
 // =============================================

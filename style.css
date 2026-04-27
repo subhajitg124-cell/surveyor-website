@@ -2081,10 +2081,14 @@ body.light .section-label {
 }
 
 /* =============================================
-   DESKTOP OVERRIDES — disable hover ripple + cursor glow
+   DESKTOP OVERRIDES — kill water ripple + cursor effects on PC
    (per user request: keep mobile behavior unchanged)
    ============================================= */
 @media (hover: hover) and (pointer: fine) {
+  /* Kill the full-screen water-ripple canvas simulation */
+  #waterCanvas {
+    display: none !important;
+  }
   /* Kill the radial water-ripple spotlight on cards/buttons */
   .water-hover::after,
   .water-hover:hover::after {
@@ -2099,5 +2103,14 @@ body.light .section-label {
   /* Kill the soft cursor-following glow */
   .cursor-glow {
     display: none !important;
+  }
+  /* Kill the mouse-tracking spotlight gradient inside form inputs */
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    background-image: none !important;
   }
 }
