@@ -84,31 +84,42 @@ h1, h2, h3, h4 {
 }
 
 /* =============================================
-   WATER-HOVER — Universal ripple on hover
+   WATER-HOVER — Professional ripple on hover
    ============================================= */
 .water-hover {
   position: relative;
   overflow: hidden;
 }
+
 .water-hover::after {
   content: '';
   position: absolute;
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.15), rgba(100, 200, 255, 0.08), transparent 70%);
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(201, 168, 76, 0.2),
+    rgba(201, 168, 76, 0.1) 20%,
+    rgba(100, 200, 255, 0.12) 40%,
+    transparent 70%
+  );
   transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease, opacity 0.6s ease;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   opacity: 0;
   pointer-events: none;
   z-index: 2;
+  filter: blur(2px);
 }
+
 .water-hover:hover::after {
-  width: 400px;
-  height: 400px;
+  width: 450px;
+  height: 450px;
   opacity: 1;
 }
-/* Water-hover position is set via JS (--mouse-x, --mouse-y) */
+
 .water-hover::after {
   left: var(--mouse-x, 50%);
   top: var(--mouse-y, 50%);
@@ -133,21 +144,61 @@ h1, h2, h3, h4 {
 }
 
 /* =============================================
-   CURSOR SPOTLIGHT — soft ambient halo
+   CURSOR SPOTLIGHT — Professional dynamic glow
    (Native cursor preserved for usability)
    ============================================= */
 .cursor-glow {
   position: fixed;
-  width: 320px;
-  height: 320px;
+  width: 350px;
+  height: 350px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(201, 168, 76, 0.08), rgba(100, 180, 255, 0.03) 45%, transparent 75%);
   pointer-events: none;
   z-index: 1;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   transform: translate3d(-50%, -50%, 0);
-  transition: opacity 0.4s ease;
-  will-change: transform;
+  opacity: 0;
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+  filter: blur(8px);
+}
+
+.cursor-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(201, 168, 76, 0.12),
+    rgba(201, 168, 76, 0.05) 25%,
+    transparent 60%
+  );
+  animation: cursorPulse 3s ease-in-out infinite;
+}
+
+.cursor-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 70% 70%,
+    rgba(100, 180, 255, 0.08),
+    rgba(100, 180, 255, 0.02) 35%,
+    transparent 70%
+  );
+  animation: cursorPulseAlt 3.5s ease-in-out infinite;
+}
+
+@keyframes cursorPulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes cursorPulseAlt {
+  0%, 100% { transform: scale(1.05); opacity: 0.5; }
+  50% { transform: scale(0.95); opacity: 0.7; }
 }
 
 @media (hover: none), (pointer: coarse) {
@@ -359,22 +410,35 @@ h1, h2, h3, h4 {
 }
 
 /* =============================================
-   RIPPLE EFFECT (for buttons)
+   RIPPLE EFFECT (for buttons) — Professional Material Design
    ============================================= */
 .ripple {
   position: relative;
   overflow: hidden;
 }
+
 .ripple .ripple-effect {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.1));
   transform: scale(0);
-  animation: rippleAnim 0.7s ease-out;
+  animation: rippleAnim 0.75s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  box-shadow: 0 0 10px rgba(201, 168, 76, 0.2);
 }
+
 @keyframes rippleAnim {
-  to { transform: scale(4); opacity: 0; }
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4.5);
+    opacity: 0;
+  }
 }
 
 /* =============================================

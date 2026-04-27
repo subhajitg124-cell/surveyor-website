@@ -219,7 +219,7 @@ function createParticles() {
 createParticles();
 
 // =============================================
-// CURSOR SPOTLIGHT — soft ambient glow that follows
+// CURSOR SPOTLIGHT — Professional smooth glow
 // (Native cursor is preserved — no custom replacement)
 // =============================================
 const isTouchDevice = window.matchMedia('(hover: none), (pointer: coarse)').matches;
@@ -231,40 +231,66 @@ if (!isTouchDevice) {
 
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;
-  let glowX = mouseX, glowY = mouseY;
+  let glowX = mouseX;
+  let glowY = mouseY;
+  let isMouseOver = false;
+  let targetOpacity = 0;
+  let currentOpacity = 0;
 
-  document.addEventListener('mousemove', e => {
+  document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    cursorGlow.style.opacity = '1';
+    if (!isMouseOver) {
+      isMouseOver = true;
+      targetOpacity = 1;
+    }
   }, { passive: true });
 
-  document.addEventListener('mouseleave', () => { cursorGlow.style.opacity = '0'; });
-  document.addEventListener('mouseenter', () => { cursorGlow.style.opacity = '1'; });
+  document.addEventListener('mouseleave', () => {
+    isMouseOver = false;
+    targetOpacity = 0;
+  });
+
+  document.addEventListener('mouseenter', () => {
+    isMouseOver = true;
+    targetOpacity = 1;
+  });
 
   function updateCursor() {
-    glowX += (mouseX - glowX) * 0.08;
-    glowY += (mouseY - glowY) * 0.08;
+    // Smooth position tracking with easing
+    glowX += (mouseX - glowX) * 0.12;
+    glowY += (mouseY - glowY) * 0.12;
+
+    // Smooth opacity transition
+    currentOpacity += (targetOpacity - currentOpacity) * 0.15;
+
     cursorGlow.style.transform = `translate3d(${glowX}px, ${glowY}px, 0) translate(-50%, -50%)`;
+    cursorGlow.style.opacity = currentOpacity.toFixed(3);
+
     requestAnimationFrame(updateCursor);
   }
   updateCursor();
 }
 
 // =============================================
-// RIPPLE EFFECT — on all buttons
+// RIPPLE EFFECT — Professional Material Design
 // =============================================
 function addRipple(e) {
   const btn = e.currentTarget;
   const rect = btn.getBoundingClientRect();
+  
+  // Create main ripple
   const ripple = document.createElement('span');
   ripple.className = 'ripple-effect';
-  const size = Math.max(rect.width, rect.height);
+  const size = Math.max(rect.width, rect.height) * 1.5;
   ripple.style.width = ripple.style.height = size + 'px';
   ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
   ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+  
   btn.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 700);
+  
+  // Remove ripple after animation completes
+  setTimeout(() => ripple.remove(), 750);
 }
 
 document.querySelectorAll('.btn').forEach(btn => {

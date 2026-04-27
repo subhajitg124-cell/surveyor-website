@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'db.php';
+require_once 'config.php';
 require_once 'mailer.php';
 
 function sanitizeInput($data) {
@@ -72,22 +73,20 @@ try {
     ];
     $_SESSION['booking_data'] = $bookingData;
 
-    // ── AUTOMATION: notify owner via Email + WhatsApp ──
-    // Both calls are wrapped in try so a failure NEVER blocks the booking.
-    $notifyResults = ['email' => null, 'whatsapp' => null];
-    try {
-        $notifyResults['email'] = sendBookingEmail($bookingData);
-    } catch (\Throwable $e) {
-        error_log('sendBookingEmail exception: ' . $e->getMessage());
-        $notifyResults['email'] = ['success' => false, 'error' => 'exception'];
-    }
-    try {
-        $notifyResults['whatsapp'] = sendBookingWhatsApp($bookingData, '919749332827');
-    } catch (\Throwable $e) {
-        error_log('sendBookingWhatsApp exception: ' . $e->getMessage());
-        $notifyResults['whatsapp'] = ['success' => false, 'error' => 'exception'];
-    }
+    // ── AUTOMATIC NOTIFICATION: Send to Admin via Email + WhatsApp ──
+    // Both notifications are automatic and non-blocking.
+    // One service failure does NOT block the booking confirmation.
+    $notifyResults = sendAllNotifications($bookingData);
     $_SESSION['notify_results'] = $notifyResults;
+    
+    logNotification('BOOKING', 'CREATED', [
+        'booking_id' => $bookingId,
+        'name' => $name,
+        'phone' => $phone,
+        'survey_type' => $surveyType,
+        'email_status' => $notifyResults['email']['success'] ?? false,
+        'whatsapp_status' => $notifyResults['whatsapp']['success'] ?? false,
+    ]);
 
     respond(true, 'Booking saved.', [
         'id'      => $bookingId,
