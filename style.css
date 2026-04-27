@@ -2079,3 +2079,25 @@ body.light .section-label {
   .service-card { height: 240px; }
   .slide { height: 220px; }
 }
+
+/* =============================================
+   DESKTOP OVERRIDES — disable hover ripple + cursor glow
+   (per user request: keep mobile behavior unchanged)
+   ============================================= */
+@media (hover: hover) and (pointer: fine) {
+  /* Kill the radial water-ripple spotlight on cards/buttons */
+  .water-hover::after,
+  .water-hover:hover::after {
+    display: none !important;
+    content: none !important;
+    opacity: 0 !important;
+  }
+  /* Kill click-time water droplet rings */
+  .water-drop-ring {
+    display: none !important;
+  }
+  /* Kill the soft cursor-following glow */
+  .cursor-glow {
+    display: none !important;
+  }
+}
