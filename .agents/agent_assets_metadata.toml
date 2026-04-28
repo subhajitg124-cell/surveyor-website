@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "OurNN5KY-fPvqQ95dCEY9"
+uri = "file://favicon-192.png"
+type = "image"
+title = "Your new SG Survey browser-tab logo"
