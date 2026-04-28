@@ -106,7 +106,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
-  <a href="#" class="nav-logo">SG <span>Survey</span></a>
+  <a href="#" class="nav-logo"><img src="logo.png" alt="SG Survey Logo" class="logo-img"> <span>Survey</span></a>
   <ul class="nav-links" id="navMenu">
     <li><a href="#" class="nav-link active">Home</a></li>
     <li><a href="#services" class="nav-link">Services</a></li>

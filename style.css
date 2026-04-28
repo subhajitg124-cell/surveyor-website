@@ -473,8 +473,12 @@ h1, h2, h3, h4 {
   text-decoration: none;
   text-shadow: 0 0 20px rgba(201, 168, 76, 0.15);
   transition: text-shadow var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 .nav-logo:hover { text-shadow: 0 0 30px rgba(201, 168, 76, 0.3); }
+.nav-logo .logo-img { height: 40px; width: auto; display: block; }
 .nav-logo span { color: var(--text-primary); }
 
 .nav-links { display: flex; gap: 36px; list-style: none; }
