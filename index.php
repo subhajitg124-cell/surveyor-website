@@ -95,6 +95,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 
 <!-- LOADER -->
 <div id="loader">
+  <img src="logo-icon.png" alt="SG Survey" class="loader-icon">
   <div class="loader-logo">SG SURVEY</div>
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
   <div class="loader-drops">
