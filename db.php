@@ -136,4 +136,6 @@ function initializeDatabase($pdo) {
 
     // Ensure active_theme key exists for upgrades
     $pdo->exec("INSERT OR IGNORE INTO site_data (data_key, data_value, data_type) VALUES ('active_theme','normal','text')");
+    $pdo->exec("INSERT OR IGNORE INTO site_data (data_key, data_value, data_type) VALUES ('upi_id','9064560741@upi','text')");
+    $pdo->exec("INSERT OR IGNORE INTO site_data (data_key, data_value, data_type) VALUES ('adsense_publisher_id','','text')");
 }

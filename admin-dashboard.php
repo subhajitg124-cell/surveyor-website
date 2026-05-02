@@ -77,6 +77,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle save monetization settings
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_monetization') {
+    header('Content-Type: application/json');
+    foreach (['upi_id','adsense_publisher_id'] as $key) {
+        $val = trim($_POST[$key] ?? '');
+        $pdo->prepare("INSERT INTO site_data (data_key,data_value,data_type) VALUES (?,?,'text') ON CONFLICT(data_key) DO UPDATE SET data_value=?,updated_at=CURRENT_TIMESTAMP")->execute([$key,$val,$val]);
+    }
+    echo json_encode(['success'=>true]);
+    exit;
+}
+
 // Handle save site data
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_site_data') {
     header('Content-Type: application/json');
@@ -344,6 +355,7 @@ tr.booking-row:hover{background:var(--card2);}
     <div class="nav-item" onclick="switchView('bookings', this)"><i class="fas fa-calendar-check"></i> Bookings <span id="pending-badge" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--orange);padding:2px 8px;border-radius:20px;font-size:11px;"><?= $stats['pending'] ?></span></div>
     <div class="nav-item" onclick="switchView('settings', this)"><i class="fas fa-sliders-h"></i> Settings</div>
     <div class="nav-item" onclick="switchView('notices', this)"><i class="fas fa-bullhorn"></i> Notices & Themes</div>
+    <div class="nav-item" onclick="switchView('monetization', this)"><i class="fas fa-rupee-sign"></i> Monetization</div>
   </nav>
   <div class="sidebar-footer">
     <div class="logout-btn" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
@@ -603,6 +615,56 @@ tr.booking-row:hover{background:var(--card2);}
 
     </div>
   </div>
+
+  <!-- MONETIZATION VIEW -->
+  <div class="view" id="view-monetization">
+    <div class="card" style="max-width:680px;">
+      <div class="card-head"><span>UPI Support Collection</span></div>
+      <div style="padding:20px 22px;">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Visitors can scan this QR code or tap the Pay button to support your website directly via UPI.</p>
+        <?php $upiId = htmlspecialchars($site['upi_id'] ?? '9064560741@upi'); ?>
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=<?= urlencode($upiId) ?>&pn=SG%20Survey&cu=INR" alt="UPI QR" style="border-radius:12px;border:2px solid rgba(201,168,76,.3);background:#fff;padding:6px;">
+          <div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">UPI ID</div>
+            <div style="font-size:18px;font-weight:600;color:var(--accent);font-family:monospace;"><?= $upiId ?></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px;">This QR + Pay button appears on your public website.</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label style="font-size:13px;color:var(--muted);">Change UPI ID</label>
+          <input type="text" id="m_upi_id" class="form-input" value="<?= $upiId ?>" placeholder="yourname@upi" style="max-width:320px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:680px;margin-top:20px;">
+      <div class="card-head"><span>Google AdSense</span></div>
+      <div style="padding:20px 22px;">
+        <?php $pubId = htmlspecialchars($site['adsense_publisher_id'] ?? ''); ?>
+        <div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;line-height:1.7;">
+          <strong style="color:var(--accent);">How to get started with AdSense:</strong><br>
+          1. Go to <a href="https://adsense.google.com" target="_blank" style="color:var(--accent);">adsense.google.com</a> and sign in with your Google account.<br>
+          2. Click <strong>Get Started</strong> and enter your website URL.<br>
+          3. After approval (2–7 days), go to <strong>Account → Account information</strong> and copy your <strong>Publisher ID</strong> (looks like <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;">ca-pub-1234567890123456</code>).<br>
+          4. Paste it below and save — ads will appear on your site automatically.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+          <label style="font-size:13px;color:var(--muted);">AdSense Publisher ID</label>
+          <input type="text" id="m_adsense_id" class="form-input" value="<?= $pubId ?>" placeholder="ca-pub-XXXXXXXXXXXXXXXX" style="max-width:380px;font-family:monospace;">
+          <?php if($pubId): ?>
+          <span style="font-size:12px;color:#4ade80;"><i class="fas fa-check-circle"></i> AdSense active — ads are showing on your site.</span>
+          <?php else: ?>
+          <span style="font-size:12px;color:var(--muted);"><i class="fas fa-info-circle"></i> No publisher ID set — ads are hidden until you add one.</span>
+          <?php endif; ?>
+        </div>
+        <button class="btn-primary" onclick="saveMonetization()" style="min-width:160px;"><i class="fas fa-save"></i> Save Settings</button>
+        <div id="monSaveMsg" style="margin-top:10px;font-size:13px;display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
 </main>
 
 <!-- BOOKING DETAIL MODAL -->
@@ -681,7 +743,7 @@ function switchView(name, el) {
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   el.classList.add('active');
-  const titles = {dashboard:'Dashboard', bookings:'Bookings', settings:'Settings', notices:'Notices & Themes'};
+  const titles = {dashboard:'Dashboard', bookings:'Bookings', settings:'Settings', notices:'Notices & Themes', monetization:'Monetization'};
   document.getElementById('pageTitle').innerHTML = '<span>' + (titles[name]||name) + '</span>';
   document.getElementById('sidebar').classList.remove('open');
 }
@@ -860,6 +922,24 @@ function openWhatsApp() {
 
 function callClient() {
   if (currentPhone) window.open('tel:+91' + currentPhone);
+}
+
+// Save monetization settings
+function saveMonetization() {
+  const upi = document.getElementById('m_upi_id').value.trim();
+  const ads = document.getElementById('m_adsense_id').value.trim();
+  const body = `action=save_monetization&upi_id=${encodeURIComponent(upi)}&adsense_publisher_id=${encodeURIComponent(ads)}`;
+  const msg = document.getElementById('monSaveMsg');
+  fetch('', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body})
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        showToast('Monetization settings saved!');
+        msg.style.display = 'block';
+        msg.style.color = '#4ade80';
+        msg.innerHTML = '<i class="fas fa-check-circle"></i> Saved! Reload the public site to see changes.';
+      }
+    });
 }
 
 // Save settings

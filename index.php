@@ -20,6 +20,8 @@ $chargeDigital = $siteData['charge_digital_survey'] ?? '8000';
 $chargeAutocad = $siteData['charge_autocad_sketch'] ?? '3000';
 $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 $activeTheme   = $siteData['active_theme'] ?? 'normal';
+$upiId         = $siteData['upi_id'] ?? '9064560741@upi';
+$adsensePubId  = trim($siteData['adsense_publisher_id'] ?? '');
 
 // Fetch active, non-expired notices
 $noticesStmt = $pdo->query("SELECT * FROM notices WHERE is_active=1 AND (expires_at IS NULL OR expires_at >= date('now')) ORDER BY created_at DESC");
@@ -43,6 +45,9 @@ $activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
+<?php if($adsensePubId): ?>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=<?= htmlspecialchars($adsensePubId) ?>" crossorigin="anonymous"></script>
+<?php endif; ?>
 </head>
 <body class="theme-<?= htmlspecialchars($activeTheme) ?>">
 
@@ -531,6 +536,40 @@ $activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
 
   </div>
 </section>
+
+<?php if($adsensePubId): ?>
+<!-- AD SLOT — above footer -->
+<section style="padding:20px 0;text-align:center;">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="<?= htmlspecialchars($adsensePubId) ?>"
+       data-ad-slot="auto"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</section>
+<?php endif; ?>
+
+<!-- UPI SUPPORT SECTION -->
+<?php if($upiId): ?>
+<section class="upi-support-section">
+  <div class="upi-support-inner">
+    <div class="upi-support-text">
+      <div class="upi-support-icon"><i class="fas fa-heart"></i></div>
+      <h3>Support This Website</h3>
+      <p>SG Survey is a free service. If you find it useful, a small contribution helps us keep it running and improve it.</p>
+      <a href="upi://pay?pa=<?= urlencode($upiId) ?>&pn=SG+Survey&cu=INR" class="upi-pay-btn">
+        <i class="fas fa-rupee-sign"></i> Pay via UPI
+      </a>
+      <div class="upi-id-label">UPI ID: <span><?= htmlspecialchars($upiId) ?></span></div>
+    </div>
+    <div class="upi-qr-wrap">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=<?= urlencode('upi://pay?pa='.$upiId.'&pn=SG+Survey&cu=INR') ?>" alt="Scan to Pay" loading="lazy">
+      <div class="upi-qr-label">Scan to Pay</div>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
 
 <!-- FOOTER -->
 <footer>
