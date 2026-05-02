@@ -29,7 +29,6 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 <meta name="theme-color" content="#06090f">
 <title>SG Survey — Professional Land Surveying Services</title>
 
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -95,6 +94,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 
 <!-- LOADER -->
 <div id="loader">
+  <img src="logo-icon.png" alt="SG Survey" class="loader-icon">
   <div class="loader-logo">SG SURVEY</div>
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
   <div class="loader-drops">
