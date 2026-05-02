@@ -565,5 +565,217 @@ $activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
 <div class="scroll-progress" id="scrollProgress"></div>
 
 <script src="script.js"></script>
+
+<!-- EVENT THEME PARTICLES -->
+<canvas id="eventCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:1;"></canvas>
+<script>
+(function(){
+  const body  = document.body;
+  const theme = [...body.classList].find(c => c.startsWith('theme-'))?.replace('theme-','') || 'normal';
+  if (theme === 'normal') return;
+
+  const canvas = document.getElementById('eventCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [], animId;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ── Particle configs per theme ── */
+  const configs = {
+    independence_day: {
+      count: 80,
+      colors: ['#FF9933','#FFFFFF','#138808','#FF9933','#ffffff'],
+      shapes: ['rect'],
+      size: () => Math.random()*7+3,
+      speed: () => Math.random()*1.5+0.8,
+      drift: () => (Math.random()-0.5)*1.2,
+      spin: true,
+      emoji: null
+    },
+    new_year: {
+      count: 60,
+      colors: ['#c9a84c','#ffffff','#e8c96e','#a0a0ff','#ffeb3b'],
+      shapes: ['star'],
+      size: () => Math.random()*10+5,
+      speed: () => Math.random()*1+0.5,
+      drift: () => (Math.random()-0.5)*0.8,
+      spin: true,
+      fireworks: true,
+      emoji: null
+    },
+    diwali: {
+      count: 55,
+      colors: ['#FF8C00','#FFD700','#FF4500','#FFA500','#FFEC8B'],
+      shapes: ['circle','star'],
+      size: () => Math.random()*8+3,
+      speed: () => Math.random()*1.2+0.6,
+      drift: () => (Math.random()-0.5)*1,
+      glow: true,
+      emoji: '🪔'
+    },
+    eid: {
+      count: 45,
+      colors: ['#00b478','#c9a84c','#ffffff','#88ffcc'],
+      shapes: ['star','circle'],
+      size: () => Math.random()*6+2,
+      speed: () => Math.random()*0.8+0.3,
+      drift: () => (Math.random()-0.5)*0.6,
+      twinkle: true,
+      emoji: '🌙'
+    },
+    offer: {
+      count: 50,
+      colors: ['#ef4444','#c9a84c','#ffffff','#ff8800'],
+      shapes: ['rect','star'],
+      size: () => Math.random()*9+4,
+      speed: () => Math.random()*2+1,
+      drift: () => (Math.random()-0.5)*1.5,
+      emoji: '🏷️'
+    },
+    christmas: {
+      count: 90,
+      colors: ['#ffffff','#e8f4fd','#cce8ff'],
+      shapes: ['circle'],
+      size: () => Math.random()*6+2,
+      speed: () => Math.random()*0.9+0.3,
+      drift: () => (Math.random()-0.5)*0.5,
+      snow: true,
+      emoji: '❄️'
+    }
+  };
+
+  const cfg = configs[theme];
+  if (!cfg) return;
+
+  function drawStar(x, y, r, color, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (i * 4 * Math.PI / 5) - Math.PI / 2;
+      const ia = a + 2 * Math.PI / 5;
+      i === 0 ? ctx.moveTo(x + r*Math.cos(a), y + r*Math.sin(a))
+              : ctx.lineTo(x + r*Math.cos(a), y + r*Math.sin(a));
+      ctx.lineTo(x + (r*0.4)*Math.cos(ia), y + (r*0.4)*Math.sin(ia));
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function createParticle() {
+    return {
+      x: Math.random() * W,
+      y: Math.random() * -H,
+      size: cfg.size(),
+      color: cfg.colors[Math.floor(Math.random()*cfg.colors.length)],
+      shape: cfg.shapes[Math.floor(Math.random()*cfg.shapes.length)],
+      speed: cfg.speed(),
+      drift: cfg.drift(),
+      angle: Math.random() * Math.PI * 2,
+      spin: (Math.random()-0.5) * 0.05,
+      alpha: Math.random()*0.6 + 0.4,
+      twinkleDir: Math.random() > 0.5 ? 1 : -1
+    };
+  }
+
+  for (let i = 0; i < cfg.count; i++) {
+    const p = createParticle();
+    p.y = Math.random() * H;
+    particles.push(p);
+  }
+
+  // Fireworks bursts for New Year
+  let fireworks = [];
+  if (cfg.fireworks) {
+    setInterval(() => {
+      if (fireworks.length > 6) return;
+      const fx = Math.random() * W * 0.8 + W * 0.1;
+      const fy = Math.random() * H * 0.5 + 50;
+      const fc = cfg.colors[Math.floor(Math.random()*cfg.colors.length)];
+      for (let i = 0; i < 20; i++) {
+        const a = (i / 20) * Math.PI * 2;
+        fireworks.push({ x:fx, y:fy, vx: Math.cos(a)*3*(Math.random()+0.5), vy: Math.sin(a)*3*(Math.random()+0.5), color:fc, alpha:1, life:60 });
+      }
+    }, 1200);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Falling particles
+    particles.forEach((p, i) => {
+      if (cfg.twinkle) p.alpha += 0.02 * p.twinkleDir;
+      if (p.alpha > 1 || p.alpha < 0.1) p.twinkleDir *= -1;
+
+      if (cfg.glow) {
+        ctx.shadowBlur  = 12;
+        ctx.shadowColor = p.color;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.translate(p.x, p.y);
+      if (cfg.spin) ctx.rotate(p.angle);
+
+      if (p.shape === 'rect') {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      } else if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size/2, 0, Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      } else if (p.shape === 'star') {
+        ctx.restore();
+        drawStar(p.x, p.y, p.size/2, p.color, p.alpha);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+      }
+      ctx.restore();
+      ctx.shadowBlur = 0;
+
+      p.y     += p.speed;
+      p.x     += p.drift;
+      p.angle += p.spin || 0;
+
+      if (p.y > H + 20) {
+        particles[i] = createParticle();
+      }
+    });
+
+    // Fireworks
+    fireworks = fireworks.filter(f => f.life > 0);
+    fireworks.forEach(f => {
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, 3, 0, Math.PI*2);
+      ctx.fillStyle = f.color;
+      ctx.globalAlpha = f.alpha;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      f.x += f.vx; f.y += f.vy;
+      f.vy += 0.08;
+      f.alpha -= 1/f.life;
+      f.life--;
+    });
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  draw();
+
+  // Pause when tab hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(animId);
+    else draw();
+  });
+})();
+</script>
 </body>
 </html>

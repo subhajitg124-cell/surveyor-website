@@ -141,7 +141,7 @@ $adminName = $_SESSION['admin_name'] ?? 'Administrator';
   --red:#ef4444;
   --radius:14px;
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;}
 
 /* ── LOADER ── */
 #loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s;}
@@ -170,7 +170,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .logout-btn:hover{background:rgba(239,68,68,.1);}
 
 /* ── MAIN ── */
-.main{margin-left:260px;flex:1;overflow-y:auto;min-height:100vh;}
+.main{margin-left:260px;flex:1;overflow-y:auto;height:100vh;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid var(--border);background:rgba(13,15,20,.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50;}
 .page-title{font-size:18px;font-weight:600;}
 .page-title span{color:var(--accent);}
