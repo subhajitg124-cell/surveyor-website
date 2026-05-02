@@ -70,7 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_theme') {
     header('Content-Type: application/json');
-    $theme = in_array($_POST['theme']??'',['normal','independence_day','new_year','diwali','eid','offer','christmas']) ? $_POST['theme'] : 'normal';
+    $allThemes = ['normal','independence_day','republic_day','new_year','holi','valentine','easter','navratri','diwali','lohri','baisakhi','onam','makar_sankranti','raksha_bandhan','ganesh_chaturthi','eid','thanksgiving','halloween','offer','christmas'];
+    $theme = in_array($_POST['theme']??'',$allThemes) ? $_POST['theme'] : 'normal';
     $pdo->prepare("UPDATE site_data SET data_value=?, updated_at=CURRENT_TIMESTAMP WHERE data_key='active_theme'")->execute([$theme]);
     echo json_encode(['success'=>true]);
     exit;
@@ -567,17 +568,30 @@ tr.booking-row:hover{background:var(--card2);}
         <div class="theme-grid" id="themeGrid">
           <?php
           $themes = [
-            ['normal',         '⚖️',  'Default',         'Classic navy & gold'],
-            ['independence_day','🇮🇳', 'Independence Day', 'Tiranga saffron, white & green'],
-            ['new_year',       '🎆',  'New Year',         'Festive gold & purple sparks'],
-            ['diwali',         '🪔',  'Diwali',           'Warm orange & golden glow'],
-            ['eid',            '🌙',  'Eid',              'Crescent green & gold'],
-            ['offer',          '🏷️',  'Special Offer',    'Bold red & gold discount look'],
-            ['christmas',      '🎄',  'Christmas',        'Festive red & green'],
+            ['normal',           '⚖️',  'Default',           'Classic navy & gold'],
+            ['new_year',         '🎆',  'New Year',           'Stars, fireworks & gold sparks'],
+            ['valentine',        '❤️',  "Valentine's Day",   'Falling hearts, pink & red'],
+            ['holi',             '🎨',  'Holi',               'Rainbow colours & splashes'],
+            ['easter',           '🐣',  'Easter',             'Pastel eggs & soft petals'],
+            ['independence_day', '🇮🇳', 'Independence Day',   'Tiranga saffron, white & green'],
+            ['republic_day',     '🔵',  'Republic Day',       'Navy blue & gold parade'],
+            ['lohri',            '🔥',  'Lohri',              'Fire sparks & warm glow'],
+            ['makar_sankranti',  '🪁',  'Makar Sankranti',    'Kites & yellow harvest sky'],
+            ['baisakhi',         '🌾',  'Baisakhi',           'Golden harvest confetti'],
+            ['navratri',         '💃',  'Navratri',           'Rainbow garba colours'],
+            ['ganesh_chaturthi', '🐘',  'Ganesh Chaturthi',   'Orange & gold sparkles'],
+            ['onam',             '🌸',  'Onam',               'Floral pookalam petals'],
+            ['raksha_bandhan',   '🪢',  'Raksha Bandhan',     'Golden threads & hearts'],
+            ['diwali',           '🪔',  'Diwali',             'Glowing lamps & fire sparks'],
+            ['eid',              '🌙',  'Eid',                'Twinkling stars & crescent'],
+            ['halloween',        '🎃',  'Halloween',          'Dark bats & orange glow'],
+            ['thanksgiving',     '🦃',  'Thanksgiving',       'Autumn leaves falling'],
+            ['christmas',        '🎄',  'Christmas',          'Snowflakes & festive red'],
+            ['offer',            '🏷️',  'Special Offer',      'Bold red & gold discount'],
           ];
           foreach($themes as [$val,$icon,$name,$desc]):
           ?>
-          <div class="theme-card th-<?= str_replace('_','',$val) === 'independence_day' ? 'independence' : str_replace('_','',$val) ?> <?= $activeTheme===$val?'selected':'' ?>" onclick="selectTheme('<?= $val ?>', this)">
+          <div class="theme-card th-<?= $val ?> <?= $activeTheme===$val?'selected':'' ?>" onclick="selectTheme('<?= $val ?>', this)">
             <div class="selected-check"><i class="fas fa-check"></i></div>
             <div class="theme-icon"><?= $icon ?></div>
             <div class="theme-name"><?= $name ?></div>

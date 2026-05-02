@@ -638,14 +638,60 @@ $activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
       emoji: '🏷️'
     },
     christmas: {
-      count: 90,
-      colors: ['#ffffff','#e8f4fd','#cce8ff'],
-      shapes: ['circle'],
-      size: () => Math.random()*6+2,
-      speed: () => Math.random()*0.9+0.3,
-      drift: () => (Math.random()-0.5)*0.5,
-      snow: true,
-      emoji: '❄️'
+      count: 90, colors: ['#ffffff','#e8f4fd','#cce8ff'], shapes: ['circle'],
+      size: ()=>Math.random()*6+2, speed: ()=>Math.random()*0.9+0.3, drift: ()=>(Math.random()-0.5)*0.5, snow:true
+    },
+    republic_day: {
+      count: 70, colors: ['#FF9933','#FFFFFF','#138808','#1E40AF','#c9a84c'], shapes: ['rect'],
+      size: ()=>Math.random()*7+3, speed: ()=>Math.random()*1.4+0.7, drift: ()=>(Math.random()-0.5)*1, spin:true
+    },
+    valentine: {
+      count: 55, colors: ['#ec4899','#f43f5e','#fb7185','#fda4af','#ffffff'], shapes: ['heart'],
+      size: ()=>Math.random()*14+6, speed: ()=>Math.random()*1.2+0.5, drift: ()=>(Math.random()-0.5)*0.8, spin:false
+    },
+    holi: {
+      count: 100, colors: ['#ff0080','#ff6600','#ffdd00','#00cc44','#0088ff','#cc00ff','#ff3399'], shapes: ['circle','rect'],
+      size: ()=>Math.random()*12+4, speed: ()=>Math.random()*2+0.8, drift: ()=>(Math.random()-0.5)*2, spin:true, glow:true
+    },
+    easter: {
+      count: 50, colors: ['#a7f3d0','#c4b5fd','#fde68a','#fbcfe8','#bfdbfe'], shapes: ['circle'],
+      size: ()=>Math.random()*10+5, speed: ()=>Math.random()*0.7+0.3, drift: ()=>(Math.random()-0.5)*0.5, twinkle:true
+    },
+    lohri: {
+      count: 65, colors: ['#ff4500','#ff8c00','#ffdd00','#ff6600','#fff700'], shapes: ['circle','star'],
+      size: ()=>Math.random()*8+3, speed: ()=>-(Math.random()*2+1), drift: ()=>(Math.random()-0.5)*1.5, glow:true, fire:true
+    },
+    makar_sankranti: {
+      count: 40, colors: ['#f59e0b','#facc15','#38bdf8','#fb923c','#86efac'], shapes: ['kite'],
+      size: ()=>Math.random()*16+8, speed: ()=>Math.random()*1.2+0.5, drift: ()=>(Math.random()-0.5)*1.2, spin:false
+    },
+    baisakhi: {
+      count: 80, colors: ['#eab308','#facc15','#f59e0b','#ffffff','#4ade80'], shapes: ['rect','star'],
+      size: ()=>Math.random()*8+3, speed: ()=>Math.random()*1.8+0.8, drift: ()=>(Math.random()-0.5)*1.4, spin:true
+    },
+    navratri: {
+      count: 75, colors: ['#d946ef','#f43f5e','#f97316','#facc15','#4ade80','#38bdf8','#818cf8'], shapes: ['circle','rect'],
+      size: ()=>Math.random()*9+3, speed: ()=>Math.random()*1.5+0.8, drift: ()=>(Math.random()-0.5)*1.5, spin:true, glow:true
+    },
+    ganesh_chaturthi: {
+      count: 60, colors: ['#f97316','#fb923c','#fbbf24','#c9a84c','#fde68a'], shapes: ['star','circle'],
+      size: ()=>Math.random()*10+4, speed: ()=>-(Math.random()*1.8+0.5), drift: ()=>(Math.random()-0.5)*1.2, glow:true, fire:true
+    },
+    onam: {
+      count: 60, colors: ['#22c55e','#4ade80','#eab308','#facc15','#f9a8d4','#fb923c'], shapes: ['petal'],
+      size: ()=>Math.random()*12+5, speed: ()=>Math.random()*1+0.5, drift: ()=>(Math.random()-0.5)*0.8, spin:true
+    },
+    raksha_bandhan: {
+      count: 50, colors: ['#f59e0b','#fbbf24','#ec4899','#f9a8d4','#ffffff'], shapes: ['heart','star'],
+      size: ()=>Math.random()*10+4, speed: ()=>Math.random()*1+0.4, drift: ()=>(Math.random()-0.5)*0.8, spin:false, twinkle:true
+    },
+    halloween: {
+      count: 45, colors: ['#f97316','#fb923c','#c026d3','#a855f7','#ffffff'], shapes: ['bat','circle'],
+      size: ()=>Math.random()*12+6, speed: ()=>Math.random()*1.2+0.5, drift: ()=>(Math.random()-0.5)*1.5, spin:false
+    },
+    thanksgiving: {
+      count: 55, colors: ['#b45309','#d97706','#f59e0b','#92400e','#dc2626','#854d0e'], shapes: ['leaf'],
+      size: ()=>Math.random()*14+6, speed: ()=>Math.random()*1.5+0.6, drift: ()=>(Math.random()-0.5)*1.8, spin:true
     }
   };
 
@@ -724,28 +770,58 @@ $activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
       ctx.translate(p.x, p.y);
       if (cfg.spin) ctx.rotate(p.angle);
 
+      ctx.fillStyle = p.color;
       if (p.shape === 'rect') {
-        ctx.fillStyle = p.color;
         ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
       } else if (p.shape === 'circle') {
+        ctx.beginPath(); ctx.arc(0,0,p.size/2,0,Math.PI*2); ctx.fill();
+      } else if (p.shape === 'heart') {
+        const s = p.size/2;
         ctx.beginPath();
-        ctx.arc(0, 0, p.size/2, 0, Math.PI*2);
-        ctx.fillStyle = p.color;
+        ctx.moveTo(0, s*0.3);
+        ctx.bezierCurveTo(-s*1.2,-s*0.6,-s*2,s*0.5,0,s*1.4);
+        ctx.bezierCurveTo(s*2,s*0.5,s*1.2,-s*0.6,0,s*0.3);
         ctx.fill();
       } else if (p.shape === 'star') {
         ctx.restore();
         drawStar(p.x, p.y, p.size/2, p.color, p.alpha);
-        ctx.save();
-        ctx.translate(p.x, p.y);
+        ctx.save(); ctx.translate(p.x, p.y);
+      } else if (p.shape === 'bat') {
+        const s = p.size/2;
+        ctx.beginPath();
+        ctx.ellipse(-s, 0, s, s*0.4, 0, 0, Math.PI*2);
+        ctx.ellipse(s, 0, s, s*0.4, 0, 0, Math.PI*2);
+        ctx.ellipse(0, s*0.2, s*0.3, s*0.4, 0, 0, Math.PI*2);
+        ctx.fill();
+      } else if (p.shape === 'leaf') {
+        const s = p.size/2;
+        ctx.beginPath();
+        ctx.moveTo(0,-s); ctx.quadraticCurveTo(s,-s*0.2,0,s);
+        ctx.quadraticCurveTo(-s,-s*0.2,0,-s);
+        ctx.fill();
+      } else if (p.shape === 'kite') {
+        const s = p.size/2;
+        ctx.beginPath();
+        ctx.moveTo(0,-s); ctx.lineTo(s*0.6,0);
+        ctx.lineTo(0,s); ctx.lineTo(-s*0.6,0);
+        ctx.closePath(); ctx.fill();
+      } else if (p.shape === 'petal') {
+        const s = p.size/2;
+        ctx.beginPath();
+        ctx.ellipse(0,-s*0.4,s*0.4,s,0,0,Math.PI*2);
+        ctx.fill();
       }
       ctx.restore();
       ctx.shadowBlur = 0;
 
-      p.y     += p.speed;
-      p.x     += p.drift;
+      p.y += p.speed;
+      p.x += p.drift;
       p.angle += p.spin || 0;
 
-      if (p.y > H + 20) {
+      // Fire: sparks go up, reset at bottom
+      if (cfg.fire && p.speed < 0) {
+        if (p.y < -20) { p.y = H + 10; p.x = Math.random()*W; p.alpha = Math.random()*0.7+0.3; }
+      } else if (p.y > H + 20) {
         particles[i] = createParticle();
       }
     });

@@ -2574,78 +2574,117 @@ body.light .section-label {
 /* =============================================
    EVENT THEMES
    ============================================= */
-/* Independence Day */
-body.theme-independence_day {
-  --accent: #ff9800;
-  --accent-light: #ffb74d;
-  --accent-glow: rgba(255,152,0,0.35);
-  --bg-primary: #0a1a08;
-  --bg-secondary: #0d2010;
-}
-body.theme-independence_day .navbar,
-body.theme-independence_day #loader {
-  background: linear-gradient(135deg, #0d1f0b, #1a3312);
-}
-body.theme-independence_day::before {
-  content: '🇮🇳';
-  position: fixed; bottom: 24px; left: 24px;
-  font-size: 40px; z-index: 9999; pointer-events: none;
-  animation: flagWave 2s ease-in-out infinite;
-}
-@keyframes flagWave { 0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);} }
+/* ── ADMIN THEME CARD COLOURS ── */
+.th-normal{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.2);}
+.th-new_year{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(100,80,200,.12));}
+.th-valentine{background:linear-gradient(135deg,rgba(236,72,153,.15),rgba(239,68,68,.1));}
+.th-holi{background:linear-gradient(135deg,rgba(255,80,0,.1),rgba(0,180,255,.1),rgba(255,220,0,.1));}
+.th-easter{background:linear-gradient(135deg,rgba(167,243,208,.15),rgba(196,181,253,.12));}
+.th-independence_day{background:linear-gradient(135deg,rgba(255,153,51,.12),rgba(19,136,8,.12));}
+.th-republic_day{background:linear-gradient(135deg,rgba(30,64,175,.15),rgba(201,168,76,.1));}
+.th-lohri{background:linear-gradient(135deg,rgba(255,80,0,.18),rgba(255,200,0,.1));}
+.th-makar_sankranti{background:linear-gradient(135deg,rgba(255,220,0,.15),rgba(56,189,248,.1));}
+.th-baisakhi{background:linear-gradient(135deg,rgba(234,179,8,.15),rgba(34,197,94,.1));}
+.th-navratri{background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(239,68,68,.1),rgba(255,200,0,.08));}
+.th-ganesh_chaturthi{background:linear-gradient(135deg,rgba(249,115,22,.15),rgba(201,168,76,.1));}
+.th-onam{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(234,179,8,.1));}
+.th-raksha_bandhan{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(236,72,153,.1));}
+.th-diwali{background:linear-gradient(135deg,rgba(255,140,0,.15),rgba(201,168,76,.1));}
+.th-eid{background:linear-gradient(135deg,rgba(0,180,120,.12),rgba(201,168,76,.1));}
+.th-halloween{background:linear-gradient(135deg,rgba(249,115,22,.15),rgba(15,0,30,.4));}
+.th-thanksgiving{background:linear-gradient(135deg,rgba(180,83,9,.15),rgba(234,179,8,.1));}
+.th-christmas{background:linear-gradient(135deg,rgba(220,38,38,.12),rgba(34,197,94,.12));}
+.th-offer{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(201,168,76,.1));}
+
+/* ── PUBLIC SITE THEME OVERRIDES ── */
 
 /* New Year */
-body.theme-new_year {
-  --accent: #e8c96e;
-  --accent-light: #f5e090;
-  --accent-glow: rgba(232,201,110,0.4);
-  --bg-primary: #06050f;
-  --bg-secondary: #0c0a1e;
-}
-body.theme-new_year::after {
-  content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 1;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='20' cy='30' r='2' fill='%23c9a84c' opacity='.6'/%3E%3Ccircle cx='80' cy='10' r='1.5' fill='%23fff' opacity='.5'/%3E%3Ccircle cx='150' cy='50' r='2' fill='%23c9a84c' opacity='.4'/%3E%3Ccircle cx='50' cy='100' r='1' fill='%23fff' opacity='.6'/%3E%3Ccircle cx='170' cy='130' r='2' fill='%23c9a84c' opacity='.5'/%3E%3C/svg%3E") repeat;
-  animation: sparkleFloat 8s linear infinite;
-}
-@keyframes sparkleFloat { from{background-position:0 0}to{background-position:200px 200px} }
+body.theme-new_year { --accent:#e8c96e; --accent-light:#f5e090; --accent-glow:rgba(232,201,110,.4); --bg-primary:#06050f; --bg-secondary:#0c0a1e; }
+
+/* Valentine */
+body.theme-valentine { --accent:#ec4899; --accent-light:#f472b6; --accent-glow:rgba(236,72,153,.4); --bg-primary:#0f0508; --bg-secondary:#1a0810; }
+body.theme-valentine .orb-1{background:radial-gradient(circle,rgba(236,72,153,.3),transparent 70%);}
+body.theme-valentine .orb-2{background:radial-gradient(circle,rgba(239,68,68,.25),transparent 70%);}
+
+/* Holi */
+body.theme-holi { --accent:#ff6b00; --accent-light:#ff9240; --accent-glow:rgba(255,107,0,.4); --bg-primary:#060308; --bg-secondary:#100510; }
+body.theme-holi .orb-1{background:radial-gradient(circle,rgba(255,107,0,.3),transparent 70%);}
+body.theme-holi .orb-2{background:radial-gradient(circle,rgba(0,180,255,.25),transparent 70%);}
+
+/* Easter */
+body.theme-easter { --accent:#a78bfa; --accent-light:#c4b5fd; --accent-glow:rgba(167,139,250,.35); --bg-primary:#060510; --bg-secondary:#0c0b1e; }
+body.theme-easter .orb-1{background:radial-gradient(circle,rgba(167,243,208,.3),transparent 70%);}
+body.theme-easter .orb-2{background:radial-gradient(circle,rgba(196,181,253,.25),transparent 70%);}
+
+/* Independence Day */
+body.theme-independence_day { --accent:#ff9800; --accent-light:#ffb74d; --accent-glow:rgba(255,152,0,.35); --bg-primary:#0a1a08; --bg-secondary:#0d2010; }
+body.theme-independence_day::before { content:'🇮🇳'; position:fixed; bottom:24px; left:24px; font-size:40px; z-index:9999; pointer-events:none; animation:flagWave 2s ease-in-out infinite; }
+@keyframes flagWave { 0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);} }
+
+/* Republic Day */
+body.theme-republic_day { --accent:#c9a84c; --accent-light:#e8c96e; --accent-glow:rgba(201,168,76,.4); --bg-primary:#040a1a; --bg-secondary:#071020; }
+body.theme-republic_day::before { content:'🇮🇳'; position:fixed; bottom:24px; left:24px; font-size:40px; z-index:9999; pointer-events:none; animation:flagWave 2s ease-in-out infinite; }
+body.theme-republic_day .orb-1{background:radial-gradient(circle,rgba(30,64,175,.35),transparent 70%);}
+
+/* Lohri */
+body.theme-lohri { --accent:#ff6600; --accent-light:#ff8c00; --accent-glow:rgba(255,102,0,.45); --bg-primary:#0f0400; --bg-secondary:#1a0800; }
+body.theme-lohri .orb-1{background:radial-gradient(circle,rgba(255,100,0,.4),transparent 70%);}
+body.theme-lohri .orb-2{background:radial-gradient(circle,rgba(255,200,0,.25),transparent 70%);}
+
+/* Makar Sankranti */
+body.theme-makar_sankranti { --accent:#f59e0b; --accent-light:#fbbf24; --accent-glow:rgba(245,158,11,.4); --bg-primary:#060a0f; --bg-secondary:#0a1020; }
+body.theme-makar_sankranti .orb-1{background:radial-gradient(circle,rgba(245,158,11,.3),transparent 70%);}
+body.theme-makar_sankranti .orb-2{background:radial-gradient(circle,rgba(56,189,248,.2),transparent 70%);}
+
+/* Baisakhi */
+body.theme-baisakhi { --accent:#eab308; --accent-light:#facc15; --accent-glow:rgba(234,179,8,.4); --bg-primary:#090800; --bg-secondary:#120f00; }
+body.theme-baisakhi .orb-1{background:radial-gradient(circle,rgba(234,179,8,.3),transparent 70%);}
+body.theme-baisakhi .orb-2{background:radial-gradient(circle,rgba(34,197,94,.2),transparent 70%);}
+
+/* Navratri */
+body.theme-navratri { --accent:#d946ef; --accent-light:#e879f9; --accent-glow:rgba(217,70,239,.4); --bg-primary:#0a0010; --bg-secondary:#120018; }
+body.theme-navratri .orb-1{background:radial-gradient(circle,rgba(217,70,239,.3),transparent 70%);}
+body.theme-navratri .orb-2{background:radial-gradient(circle,rgba(239,68,68,.25),transparent 70%);}
+
+/* Ganesh Chaturthi */
+body.theme-ganesh_chaturthi { --accent:#f97316; --accent-light:#fb923c; --accent-glow:rgba(249,115,22,.4); --bg-primary:#0f0500; --bg-secondary:#1a0a00; }
+body.theme-ganesh_chaturthi .orb-1{background:radial-gradient(circle,rgba(249,115,22,.35),transparent 70%);}
+body.theme-ganesh_chaturthi .orb-2{background:radial-gradient(circle,rgba(201,168,76,.25),transparent 70%);}
+
+/* Onam */
+body.theme-onam { --accent:#22c55e; --accent-light:#4ade80; --accent-glow:rgba(34,197,94,.35); --bg-primary:#020f06; --bg-secondary:#041a0c; }
+body.theme-onam .orb-1{background:radial-gradient(circle,rgba(34,197,94,.3),transparent 70%);}
+body.theme-onam .orb-2{background:radial-gradient(circle,rgba(234,179,8,.2),transparent 70%);}
+
+/* Raksha Bandhan */
+body.theme-raksha_bandhan { --accent:#f59e0b; --accent-light:#fbbf24; --accent-glow:rgba(245,158,11,.4); --bg-primary:#0a0800; --bg-secondary:#140f00; }
+body.theme-raksha_bandhan .orb-1{background:radial-gradient(circle,rgba(245,158,11,.3),transparent 70%);}
+body.theme-raksha_bandhan .orb-2{background:radial-gradient(circle,rgba(236,72,153,.2),transparent 70%);}
 
 /* Diwali */
-body.theme-diwali {
-  --accent: #ff8c00;
-  --accent-light: #ffb347;
-  --accent-glow: rgba(255,140,0,0.4);
-  --bg-primary: #0f0800;
-  --bg-secondary: #1a0f00;
-}
-body.theme-diwali .orb-1 { background: radial-gradient(circle, rgba(255,140,0,.35), transparent 70%); }
-body.theme-diwali .orb-2 { background: radial-gradient(circle, rgba(201,168,76,.3), transparent 70%); }
+body.theme-diwali { --accent:#ff8c00; --accent-light:#ffb347; --accent-glow:rgba(255,140,0,.4); --bg-primary:#0f0800; --bg-secondary:#1a0f00; }
+body.theme-diwali .orb-1{background:radial-gradient(circle,rgba(255,140,0,.35),transparent 70%);}
+body.theme-diwali .orb-2{background:radial-gradient(circle,rgba(201,168,76,.3),transparent 70%);}
 
 /* Eid */
-body.theme-eid {
-  --accent: #00b478;
-  --accent-light: #00d68f;
-  --accent-glow: rgba(0,180,120,0.35);
-  --bg-primary: #020f09;
-  --bg-secondary: #041a0e;
-}
+body.theme-eid { --accent:#00b478; --accent-light:#00d68f; --accent-glow:rgba(0,180,120,.35); --bg-primary:#020f09; --bg-secondary:#041a0e; }
 
-/* Special Offer */
-body.theme-offer {
-  --accent: #ef4444;
-  --accent-light: #f87171;
-  --accent-glow: rgba(239,68,68,0.35);
-}
-body.theme-offer .notice-banner { animation: offerPulse 2s ease-in-out infinite; }
-@keyframes offerPulse { 0%,100%{filter:brightness(1);}50%{filter:brightness(1.1);} }
+/* Halloween */
+body.theme-halloween { --accent:#f97316; --accent-light:#fb923c; --accent-glow:rgba(249,115,22,.4); --bg-primary:#060008; --bg-secondary:#0c0010; }
+body.theme-halloween .orb-1{background:radial-gradient(circle,rgba(249,115,22,.3),transparent 70%);}
+body.theme-halloween .orb-2{background:radial-gradient(circle,rgba(88,0,128,.35),transparent 70%);}
+
+/* Thanksgiving */
+body.theme-thanksgiving { --accent:#d97706; --accent-light:#f59e0b; --accent-glow:rgba(217,119,6,.4); --bg-primary:#080400; --bg-secondary:#120800; }
+body.theme-thanksgiving .orb-1{background:radial-gradient(circle,rgba(217,119,6,.3),transparent 70%);}
+body.theme-thanksgiving .orb-2{background:radial-gradient(circle,rgba(180,83,9,.25),transparent 70%);}
 
 /* Christmas */
-body.theme-christmas {
-  --accent: #dc2626;
-  --accent-light: #ef4444;
-  --accent-glow: rgba(220,38,38,0.35);
-  --bg-primary: #050f05;
-  --bg-secondary: #091509;
-}
-body.theme-christmas .orb-1 { background: radial-gradient(circle, rgba(220,38,38,.3), transparent 70%); }
-body.theme-christmas .orb-2 { background: radial-gradient(circle, rgba(34,197,94,.25), transparent 70%); }
+body.theme-christmas { --accent:#dc2626; --accent-light:#ef4444; --accent-glow:rgba(220,38,38,.35); --bg-primary:#050f05; --bg-secondary:#091509; }
+body.theme-christmas .orb-1{background:radial-gradient(circle,rgba(220,38,38,.3),transparent 70%);}
+body.theme-christmas .orb-2{background:radial-gradient(circle,rgba(34,197,94,.25),transparent 70%);}
+
+/* Special Offer */
+body.theme-offer { --accent:#ef4444; --accent-light:#f87171; --accent-glow:rgba(239,68,68,.35); }
+body.theme-offer .notice-banner { animation: offerPulse 2s ease-in-out infinite; }
+@keyframes offerPulse { 0%,100%{filter:brightness(1);}50%{filter:brightness(1.1);} }
