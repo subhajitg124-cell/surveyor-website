@@ -838,3 +838,163 @@ if (window.matchMedia('(max-width: 900px)').matches) {
     });
   }, { passive: true });
 }
+
+// =============================================
+// GLANCE EFFECTS — Auto eye-glancing animations on key elements
+// =============================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Apply glance effects to important visual elements
+  const glanceElements = {
+    '.hero-left h1': 'glance-rotate',
+    '.hero-badge': 'glance-left',
+    '.section-title': 'glance-up',
+    '.stat-number': 'glance-right'
+  };
+
+  Object.entries(glanceElements).forEach(([selector, animClass]) => {
+    document.querySelectorAll(selector).forEach((el, idx) => {
+      el.classList.add(animClass);
+      el.style.setProperty('--glance-delay', (idx * 0.5) + 's');
+    });
+  });
+
+  // Add shimmer effect to hero title
+  const heroTitle = document.querySelector('.hero-left h1');
+  if (heroTitle) {
+    heroTitle.classList.add('shimmer-effect');
+  }
+
+  // Add shimmer to section labels
+  document.querySelectorAll('.section-label').forEach(label => {
+    label.classList.add('shimmer-effect');
+  });
+});
+
+// =============================================
+// AUTO ANIMATIONS ON CARDS — Pulsing & Breathing
+// ============================================= 
+document.addEventListener('DOMContentLoaded', () => {
+  // Add pulse animation to service cards with staggered delays
+  const serviceCards = document.querySelectorAll('.service-card');
+  serviceCards.forEach((card, idx) => {
+    card.style.setProperty('--card-index', idx);
+  });
+
+  // Add auto animations to testimonial cards
+  const testimonialCards = document.querySelectorAll('.testimonial-card');
+  testimonialCards.forEach((card, idx) => {
+    card.style.setProperty('--card-index', idx);
+  });
+
+  // Add glow effect to CTA buttons
+  const ctaButtons = document.querySelectorAll('.btn-primary:not([type="submit"])');
+  ctaButtons.forEach(btn => {
+    btn.classList.add('icon-pulse');
+  });
+
+  // Apply bounce entrance animation on scroll
+  const entranceElements = document.querySelectorAll('.service-card, .testimonial-card, .survey-point');
+  const entranceObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry, idx) => {
+      if (entry.isIntersecting) {
+        // Randomly select an entrance animation
+        const animations = ['bounce-in', 'slide-in-left', 'slide-in-right', 'zoom-in'];
+        const randomAnim = animations[Math.floor(Math.random() * animations.length)];
+        entry.target.classList.add(randomAnim);
+        entry.target.style.animationDelay = (idx % 5) * 0.1 + 's';
+        entranceObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  entranceElements.forEach(el => entranceObserver.observe(el));
+});
+
+// =============================================
+// ICON ANIMATIONS — Pulse, Spin, Bounce
+// ============================================= 
+document.addEventListener('DOMContentLoaded', () => {
+  // Add pulse to service icons
+  const serviceIcons = document.querySelectorAll('.service-icon');
+  serviceIcons.forEach((icon, idx) => {
+    if (idx % 2 === 0) {
+      icon.classList.add('icon-pulse');
+      icon.style.animationDelay = (idx * 0.3) + 's';
+    }
+  });
+
+  // Add bounce animation to contact info icons
+  const infoIcons = document.querySelectorAll('.info-icon');
+  infoIcons.forEach((icon, idx) => {
+    if (idx % 3 === 0) {
+      icon.classList.add('icon-bounce');
+      icon.style.animationDelay = (idx * 0.2) + 's';
+    }
+  });
+
+  // Add spinning animation to featured icons
+  const floatingBgIcons = document.querySelectorAll('.float-icon');
+  floatingBgIcons.forEach((icon, idx) => {
+    if (idx % 4 === 0) {
+      icon.style.animation = `fbDrift${(idx % 12) + 1} ${30 + (idx % 10) * 2}s ease-in-out infinite`;
+    }
+  });
+});
+
+// =============================================
+// FLASH EFFECTS ON INTERACTION
+// ============================================= 
+document.addEventListener('DOMContentLoaded', () => {
+  // Add flash effect to buttons on click
+  document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.add('flash-effect');
+      setTimeout(() => btn.classList.remove('flash-effect'), 1500);
+    });
+  });
+
+  // Add blink effect to important badges/labels
+  const badges = document.querySelectorAll('.hero-badge, [class*="badge"]');
+  badges.forEach(badge => {
+    badge.addEventListener('mouseenter', () => {
+      badge.classList.add('blink-effect');
+    });
+    badge.addEventListener('mouseleave', () => {
+      badge.classList.remove('blink-effect');
+    });
+  });
+});
+
+// =============================================
+// PROGRESSIVE TEXT REVEAL — Staggered character appearance
+// ============================================= 
+function revealText(element) {
+  const text = element.textContent;
+  element.textContent = '';
+  element.style.display = 'inline';
+  
+  let i = 0;
+  const revealInterval = setInterval(() => {
+    element.textContent += text[i];
+    i++;
+    if (i >= text.length) {
+      clearInterval(revealInterval);
+    }
+  }, 30);
+}
+
+// Optionally apply to section titles on scroll
+const titleRevealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !entry.target.dataset.revealed) {
+      entry.target.dataset.revealed = 'true';
+      // Uncomment below to enable character-by-character reveal:
+      // revealText(entry.target);
+      titleRevealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.section-title').forEach(title => {
+  titleRevealObserver.observe(title);
+});
