@@ -39,6 +39,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Handle notice actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_notice') {
+    header('Content-Type: application/json');
+    $title   = trim($_POST['title'] ?? '');
+    $message = trim($_POST['message'] ?? '');
+    $type    = in_array($_POST['type'] ?? '', ['info','offer','event','alert','update']) ? $_POST['type'] : 'info';
+    $expires = !empty($_POST['expires_at']) ? $_POST['expires_at'] : null;
+    if (!$title || !$message) { echo json_encode(['success'=>false,'error'=>'Title and message required']); exit; }
+    $stmt = $pdo->prepare("INSERT INTO notices (title,message,type,is_active,expires_at) VALUES (?,?,?,1,?)");
+    $stmt->execute([$title,$message,$type,$expires]);
+    echo json_encode(['success'=>true,'id'=>$pdo->lastInsertId()]);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_notice') {
+    header('Content-Type: application/json');
+    $id = intval($_POST['id']);
+    $pdo->prepare("UPDATE notices SET is_active = CASE WHEN is_active=1 THEN 0 ELSE 1 END WHERE id=?")->execute([$id]);
+    $row = $pdo->prepare("SELECT is_active FROM notices WHERE id=?");
+    $row->execute([$id]);
+    echo json_encode(['success'=>true,'is_active'=>(int)$row->fetch()['is_active']]);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_notice') {
+    header('Content-Type: application/json');
+    $id = intval($_POST['id']);
+    $pdo->prepare("DELETE FROM notices WHERE id=?")->execute([$id]);
+    echo json_encode(['success'=>true]);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_theme') {
+    header('Content-Type: application/json');
+    $theme = in_array($_POST['theme']??'',['normal','independence_day','new_year','diwali','eid','offer','christmas']) ? $_POST['theme'] : 'normal';
+    $pdo->prepare("UPDATE site_data SET data_value=?, updated_at=CURRENT_TIMESTAMP WHERE data_key='active_theme'")->execute([$theme]);
+    echo json_encode(['success'=>true]);
+    exit;
+}
+
 // Handle save site data
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_site_data') {
     header('Content-Type: application/json');
@@ -71,6 +108,8 @@ $siteRows = $pdo->query("SELECT data_key, data_value FROM site_data")->fetchAll(
 $site = [];
 foreach ($siteRows as $r) $site[$r['data_key']] = $r['data_value'];
 
+$notices = $pdo->query("SELECT * FROM notices ORDER BY created_at DESC")->fetchAll();
+$activeTheme = $site['active_theme'] ?? 'normal';
 $adminName = $_SESSION['admin_name'] ?? 'Administrator';
 ?>
 <!DOCTYPE html>
@@ -219,6 +258,43 @@ tr.booking-row:hover{background:var(--card2);}
 .form-input:focus{border-color:var(--accent);}
 .settings-footer{padding:0 22px 22px;display:flex;gap:10px;}
 
+/* ── NOTICES & THEMES ── */
+.notice-form{padding:22px;border-bottom:1px solid var(--border);}
+.notice-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.notice-form-grid .full{grid-column:1/-1;}
+.notice-list{padding:16px 22px;display:flex;flex-direction:column;gap:10px;}
+.notice-item{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:14px;transition:.2s;}
+.notice-item.inactive{opacity:.45;}
+.notice-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.nt-info{background:#3b82f6;}.nt-offer{background:#c9a84c;}.nt-event{background:#a855f7;}.nt-alert{background:#ef4444;}.nt-update{background:#22c55e;}
+.notice-content{flex:1;min-width:0;}
+.notice-title{font-size:14px;font-weight:600;margin-bottom:3px;}
+.notice-msg{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notice-meta{font-size:11px;color:var(--muted);margin-top:4px;}
+.notice-actions{display:flex;gap:6px;flex-shrink:0;}
+.toggle-btn{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.toggle-btn.off{background:rgba(255,255,255,.05);color:var(--muted);border-color:var(--border);}
+.toggle-btn:hover{filter:brightness(1.2);}
+.del-btn{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.del-btn:hover{background:rgba(239,68,68,.25);}
+/* Theme Cards */
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;padding:22px;}
+.theme-card{border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;border:2px solid transparent;transition:.25s;position:relative;}
+.theme-card:hover{transform:translateY(-3px);}
+.theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(201,168,76,.2);}
+.theme-card .theme-icon{font-size:32px;margin-bottom:8px;}
+.theme-card .theme-name{font-size:13px;font-weight:600;}
+.theme-card .theme-desc{font-size:11px;opacity:.7;margin-top:3px;}
+.theme-card .selected-check{position:absolute;top:8px;right:8px;background:var(--accent);color:#111;width:20px;height:20px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:10px;}
+.theme-card.selected .selected-check{display:flex;}
+.th-normal{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.15);}
+.th-independence{background:linear-gradient(135deg,rgba(255,153,51,.12),rgba(19,136,8,.12));}
+.th-newyear{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(100,80,200,.12));}
+.th-diwali{background:linear-gradient(135deg,rgba(255,140,0,.15),rgba(201,168,76,.1));}
+.th-eid{background:linear-gradient(135deg,rgba(0,180,120,.12),rgba(201,168,76,.1));}
+.th-offer{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(201,168,76,.1));}
+.th-christmas{background:linear-gradient(135deg,rgba(220,38,38,.12),rgba(34,197,94,.12));}
+
 /* ── TOAST ── */
 .toast{position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--border);border-left:4px solid var(--green);padding:14px 20px;border-radius:12px;font-size:14px;z-index:999;transform:translateY(20px);opacity:0;transition:.3s;display:flex;align-items:center;gap:10px;box-shadow:0 8px 40px rgba(0,0,0,.4);}
 .toast.show{transform:translateY(0);opacity:1;}
@@ -266,6 +342,7 @@ tr.booking-row:hover{background:var(--card2);}
     <div class="nav-item active" onclick="switchView('dashboard', this)"><i class="fas fa-chart-pie"></i> Dashboard</div>
     <div class="nav-item" onclick="switchView('bookings', this)"><i class="fas fa-calendar-check"></i> Bookings <span id="pending-badge" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--orange);padding:2px 8px;border-radius:20px;font-size:11px;"><?= $stats['pending'] ?></span></div>
     <div class="nav-item" onclick="switchView('settings', this)"><i class="fas fa-sliders-h"></i> Settings</div>
+    <div class="nav-item" onclick="switchView('notices', this)"><i class="fas fa-bullhorn"></i> Notices & Themes</div>
   </nav>
   <div class="sidebar-footer">
     <div class="logout-btn" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
@@ -415,6 +492,103 @@ tr.booking-row:hover{background:var(--card2);}
       </div>
     </div>
   </div>
+
+  <!-- NOTICES & THEMES VIEW -->
+  <div class="view" id="view-notices">
+    <div class="view-wrap">
+
+      <!-- Add Notice Form -->
+      <div class="section-card">
+        <div class="section-head"><h3><i class="fas fa-plus-circle"></i> Post a Notice / Update</h3></div>
+        <div class="notice-form">
+          <div class="notice-form-grid">
+            <div class="form-group full"><label>Notice Title</label><input class="form-input" id="n_title" placeholder="e.g. Special Discount — 20% Off This Week!"></div>
+            <div class="form-group full"><label>Message</label><textarea class="form-input" id="n_message" rows="3" placeholder="Write the full notice or announcement here..." style="resize:vertical;"></textarea></div>
+            <div class="form-group">
+              <label>Type</label>
+              <select class="form-input" id="n_type">
+                <option value="info">ℹ️ Info — General Information</option>
+                <option value="offer">🏷️ Offer — Special Discount / Deal</option>
+                <option value="event">🎉 Event — Festival / Occasion</option>
+                <option value="alert">🚨 Alert — Important Notice</option>
+                <option value="update">✅ Update — New Service / Change</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Expires On (optional)</label>
+              <input class="form-input" id="n_expires" type="date">
+            </div>
+          </div>
+          <button class="btn btn-accent" onclick="addNotice()"><i class="fas fa-paper-plane"></i> Publish Notice</button>
+        </div>
+        <!-- Notice List -->
+        <div style="padding:0 22px 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--muted);">Published Notices</span>
+          <span style="font-size:12px;color:var(--muted);"><?= count($notices) ?> total</span>
+        </div>
+        <div class="notice-list" id="noticeList">
+          <?php if(empty($notices)): ?>
+          <div class="empty-state" style="padding:30px 20px;"><i class="fas fa-bell-slash"></i>No notices yet. Post your first one above.</div>
+          <?php endif; ?>
+          <?php foreach($notices as $n):
+            $expired = $n['expires_at'] && $n['expires_at'] < date('Y-m-d');
+          ?>
+          <div class="notice-item <?= !$n['is_active'] ? 'inactive' : '' ?>" id="notice-<?= $n['id'] ?>">
+            <div class="notice-dot nt-<?= $n['type'] ?>"></div>
+            <div class="notice-content">
+              <div class="notice-title"><?= htmlspecialchars($n['title']) ?><?= $expired ? ' <span style="color:var(--red);font-size:10px;margin-left:6px;">[EXPIRED]</span>' : '' ?></div>
+              <div class="notice-msg"><?= htmlspecialchars($n['message']) ?></div>
+              <div class="notice-meta">
+                <span class="badge badge-<?= $n['type']==='info'?'confirmed':($n['type']==='offer'?'pending':($n['type']==='event'?'confirmed':'cancelled')) ?>" style="font-size:10px;padding:2px 8px;"><?= strtoupper($n['type']) ?></span>
+                &nbsp;·&nbsp; <?= date('d M Y', strtotime($n['created_at'])) ?>
+                <?= $n['expires_at'] ? ' &nbsp;·&nbsp; Expires: '.date('d M Y', strtotime($n['expires_at'])) : '' ?>
+              </div>
+            </div>
+            <div class="notice-actions">
+              <button class="toggle-btn <?= !$n['is_active'] ? 'off' : '' ?>" title="<?= $n['is_active'] ? 'Deactivate' : 'Activate' ?>" onclick="toggleNotice(<?= $n['id'] ?>, this)">
+                <i class="fas fa-<?= $n['is_active'] ? 'eye' : 'eye-slash' ?>"></i>
+              </button>
+              <button class="del-btn" title="Delete" onclick="deleteNotice(<?= $n['id'] ?>)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
+      <!-- Event Theme Selector -->
+      <div class="section-card">
+        <div class="section-head">
+          <h3><i class="fas fa-palette"></i> Site Event Theme</h3>
+          <button class="btn btn-accent" onclick="saveTheme()" style="padding:7px 16px;font-size:12px;"><i class="fas fa-save"></i> Apply Theme</button>
+        </div>
+        <p style="padding:12px 22px 0;font-size:13px;color:var(--muted);">Choose a theme to change the website's look for special occasions. Visitors will see the themed colours automatically.</p>
+        <div class="theme-grid" id="themeGrid">
+          <?php
+          $themes = [
+            ['normal',         '⚖️',  'Default',         'Classic navy & gold'],
+            ['independence_day','🇮🇳', 'Independence Day', 'Tiranga saffron, white & green'],
+            ['new_year',       '🎆',  'New Year',         'Festive gold & purple sparks'],
+            ['diwali',         '🪔',  'Diwali',           'Warm orange & golden glow'],
+            ['eid',            '🌙',  'Eid',              'Crescent green & gold'],
+            ['offer',          '🏷️',  'Special Offer',    'Bold red & gold discount look'],
+            ['christmas',      '🎄',  'Christmas',        'Festive red & green'],
+          ];
+          foreach($themes as [$val,$icon,$name,$desc]):
+          ?>
+          <div class="theme-card th-<?= str_replace('_','',$val) === 'independence_day' ? 'independence' : str_replace('_','',$val) ?> <?= $activeTheme===$val?'selected':'' ?>" onclick="selectTheme('<?= $val ?>', this)">
+            <div class="selected-check"><i class="fas fa-check"></i></div>
+            <div class="theme-icon"><?= $icon ?></div>
+            <div class="theme-name"><?= $name ?></div>
+            <div class="theme-desc"><?= $desc ?></div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </main>
 
 <!-- BOOKING DETAIL MODAL -->
@@ -493,8 +667,8 @@ function switchView(name, el) {
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   el.classList.add('active');
-  const titles = {dashboard:'Dashboard', bookings:'Bookings', settings:'Settings'};
-  document.getElementById('pageTitle').innerHTML = '<span>' + titles[name] + '</span>';
+  const titles = {dashboard:'Dashboard', bookings:'Bookings', settings:'Settings', notices:'Notices & Themes'};
+  document.getElementById('pageTitle').innerHTML = '<span>' + (titles[name]||name) + '</span>';
   document.getElementById('sidebar').classList.remove('open');
 }
 
@@ -689,6 +863,90 @@ function showToast(msg) {
   document.getElementById('toastMsg').textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── NOTICES ──
+let selectedTheme = '<?= $activeTheme ?>';
+
+function addNotice() {
+  const title   = document.getElementById('n_title').value.trim();
+  const message = document.getElementById('n_message').value.trim();
+  const type    = document.getElementById('n_type').value;
+  const expires = document.getElementById('n_expires').value;
+  if (!title || !message) { showToast('Title and message are required'); return; }
+  fetch('', {
+    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:`action=add_notice&title=${encodeURIComponent(title)}&message=${encodeURIComponent(message)}&type=${type}&expires_at=${expires}`
+  }).then(r=>r.json()).then(d=>{
+    if (!d.success) { showToast('Error: '+(d.error||'failed')); return; }
+    showToast('✅ Notice published!');
+    document.getElementById('n_title').value = '';
+    document.getElementById('n_message').value = '';
+    document.getElementById('n_expires').value = '';
+    // Inject new row
+    const list = document.getElementById('noticeList');
+    const emptyEl = list.querySelector('.empty-state');
+    if (emptyEl) emptyEl.remove();
+    const typeEmoji = {info:'ℹ️',offer:'🏷️',event:'🎉',alert:'🚨',update:'✅'};
+    list.insertAdjacentHTML('afterbegin', `
+      <div class="notice-item" id="notice-${d.id}" style="animation:fadeUp .3s ease">
+        <div class="notice-dot nt-${type}"></div>
+        <div class="notice-content">
+          <div class="notice-title">${title}</div>
+          <div class="notice-msg">${message}</div>
+          <div class="notice-meta"><span style="font-size:10px;text-transform:uppercase;font-weight:600;">${typeEmoji[type]||''} ${type}</span> &nbsp;·&nbsp; Just now</div>
+        </div>
+        <div class="notice-actions">
+          <button class="toggle-btn" title="Deactivate" onclick="toggleNotice(${d.id}, this)"><i class="fas fa-eye"></i></button>
+          <button class="del-btn" title="Delete" onclick="deleteNotice(${d.id})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>`);
+  }).catch(()=>showToast('Network error'));
+}
+
+function toggleNotice(id, btn) {
+  fetch('',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`action=toggle_notice&id=${id}`})
+    .then(r=>r.json()).then(d=>{
+      const item = document.getElementById('notice-'+id);
+      if (d.is_active) {
+        item.classList.remove('inactive');
+        btn.classList.remove('off');
+        btn.title='Deactivate';
+        btn.innerHTML='<i class="fas fa-eye"></i>';
+        showToast('Notice is now LIVE on the website');
+      } else {
+        item.classList.add('inactive');
+        btn.classList.add('off');
+        btn.title='Activate';
+        btn.innerHTML='<i class="fas fa-eye-slash"></i>';
+        showToast('Notice hidden from website');
+      }
+    });
+}
+
+function deleteNotice(id) {
+  if (!confirm('Delete this notice permanently?')) return;
+  fetch('',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`action=delete_notice&id=${id}`})
+    .then(r=>r.json()).then(d=>{
+      if (d.success) {
+        const el = document.getElementById('notice-'+id);
+        if (el) { el.style.opacity='0'; el.style.transform='translateX(40px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }
+        showToast('🗑 Notice deleted');
+      }
+    });
+}
+
+function selectTheme(val, card) {
+  selectedTheme = val;
+  document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+function saveTheme() {
+  fetch('',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`action=save_theme&theme=${selectedTheme}`})
+    .then(r=>r.json()).then(d=>{
+      if (d.success) showToast('🎨 Theme applied! Visitors will see the new look.');
+    });
 }
 
 // Logout

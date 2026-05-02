@@ -100,6 +100,18 @@ function initializeDatabase($pdo) {
         $insert->execute(['abhijitghosh', $hash, 'abhijitghosh9749332827@gmail.com', 'Abhijit Ghosh']);
     }
 
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS notices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT DEFAULT 'info' CHECK(type IN ('info','offer','event','alert','update')),
+            is_active INTEGER DEFAULT 1,
+            expires_at DATE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+
     // Insert default site data if not exists
     $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM site_data");
     $stmt->execute();
@@ -114,10 +126,14 @@ function initializeDatabase($pdo) {
             ['charge_digital_survey', '8000', 'number'],
             ['charge_autocad_sketch', '3000', 'number'],
             ['charge_laser_survey', '10000', 'number'],
+            ['active_theme', 'normal', 'text'],
         ];
         $stmt = $pdo->prepare("INSERT INTO site_data (data_key, data_value, data_type) VALUES (?, ?, ?)");
         foreach ($defaults as $d) {
             $stmt->execute($d);
         }
     }
+
+    // Ensure active_theme key exists for upgrades
+    $pdo->exec("INSERT OR IGNORE INTO site_data (data_key, data_value, data_type) VALUES ('active_theme','normal','text')");
 }

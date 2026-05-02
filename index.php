@@ -19,6 +19,11 @@ $chargeLand    = $siteData['charge_land_survey']    ?? '5000';
 $chargeDigital = $siteData['charge_digital_survey'] ?? '8000';
 $chargeAutocad = $siteData['charge_autocad_sketch'] ?? '3000';
 $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
+$activeTheme   = $siteData['active_theme'] ?? 'normal';
+
+// Fetch active, non-expired notices
+$noticesStmt = $pdo->query("SELECT * FROM notices WHERE is_active=1 AND (expires_at IS NULL OR expires_at >= date('now')) ORDER BY created_at DESC");
+$activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,7 +44,7 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="theme-<?= htmlspecialchars($activeTheme) ?>">
 
 <!-- WATER RIPPLE CANVAS (interactive water surface) -->
 <canvas id="waterCanvas"></canvas>
@@ -103,6 +108,32 @@ $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
     <span class="loader-drop"></span>
   </div>
 </div>
+
+<?php if (!empty($activeNotices)): ?>
+<?php $n = $activeNotices[0]; $typeIcons = ['info'=>'fa-info-circle','offer'=>'fa-tag','event'=>'fa-star','alert'=>'fa-exclamation-triangle','update'=>'fa-check-circle']; ?>
+<div class="notice-banner notice-<?= $n['type'] ?>" id="noticeBanner">
+  <div class="notice-banner-inner">
+    <?php if(count($activeNotices) > 1): ?>
+    <div class="notice-ticker" id="noticeTicker">
+      <?php foreach($activeNotices as $ni): ?>
+      <div class="notice-tick-item">
+        <i class="fas <?= $typeIcons[$ni['type']] ?? 'fa-bell' ?>"></i>
+        <strong><?= htmlspecialchars($ni['title']) ?></strong>
+        — <?= htmlspecialchars($ni['message']) ?>
+      </div>
+      <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <span class="notice-single">
+      <i class="fas <?= $typeIcons[$n['type']] ?? 'fa-bell' ?>"></i>
+      <strong><?= htmlspecialchars($n['title']) ?></strong>
+      — <?= htmlspecialchars($n['message']) ?>
+    </span>
+    <?php endif; ?>
+  </div>
+  <button class="notice-close" onclick="this.closest('.notice-banner').style.display='none'" aria-label="Close">×</button>
+</div>
+<?php endif; ?>
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
