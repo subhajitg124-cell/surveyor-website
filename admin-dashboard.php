@@ -622,9 +622,9 @@ tr.booking-row:hover{background:var(--card2);}
       <div class="card-head"><span>UPI Support Collection</span></div>
       <div style="padding:20px 22px;">
         <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Visitors can scan this QR code or tap the Pay button to support your website directly via UPI.</p>
-        <?php $upiId = htmlspecialchars($site['upi_id'] ?? '9064560741@upi'); ?>
+        <?php $upiId = htmlspecialchars($site['upi_id'] ?? '9064560741@okbizaxis'); ?>
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px;">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=<?= urlencode($upiId) ?>&pn=SG%20Survey&cu=INR" alt="UPI QR" style="border-radius:12px;border:2px solid rgba(201,168,76,.3);background:#fff;padding:6px;">
+          <img src="payment-qr.jpeg" alt="UPI QR" style="border-radius:12px;border:2px solid rgba(201,168,76,.3);background:#fff;padding:6px;width:160px;height:auto;object-fit:contain;">
           <div>
             <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">UPI ID</div>
             <div style="font-size:18px;font-weight:600;color:var(--accent);font-family:monospace;"><?= $upiId ?></div>

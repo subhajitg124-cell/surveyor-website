@@ -20,7 +20,7 @@ $chargeDigital = $siteData['charge_digital_survey'] ?? '8000';
 $chargeAutocad = $siteData['charge_autocad_sketch'] ?? '3000';
 $chargeLaser   = $siteData['charge_laser_survey']   ?? '10000';
 $activeTheme   = $siteData['active_theme'] ?? 'normal';
-$upiId         = $siteData['upi_id'] ?? '9064560741@upi';
+$upiId         = $siteData['upi_id'] ?? '9064560741@okbizaxis';
 $adsensePubId  = trim($siteData['adsense_publisher_id'] ?? '');
 
 // Fetch active, non-expired notices
@@ -564,7 +564,7 @@ $activeNotices = $noticesStmt ? $noticesStmt->fetchAll() : [];
       <div class="upi-id-label">UPI ID: <span><?= htmlspecialchars($upiId) ?></span></div>
     </div>
     <div class="upi-qr-wrap">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=<?= urlencode('upi://pay?pa='.$upiId.'&pn=SG+Survey&cu=INR') ?>" alt="Scan to Pay" loading="lazy">
+      <img src="payment-qr.jpeg" alt="Scan to Pay" loading="lazy">
       <div class="upi-qr-label">Scan to Pay</div>
     </div>
   </div>
